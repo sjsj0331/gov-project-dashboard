@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,7 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── 라이트 모드 변수 ── */
   :root {
     --bg: #f6f7fb;
     --bg-grad-1: #eef2ff;
@@ -31,16 +32,40 @@
     --safe-bg: #d1fae5;
     --neutral: #64748b;
     --neutral-bg: #e2e8f0;
-    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-    --shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
-    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
-    --shadow-lg: 0 10px 30px rgba(79, 70, 229, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06);
+    --shadow-sm: 0 1px 2px rgba(15,23,42,0.04);
+    --shadow: 0 2px 4px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.03);
+    --shadow-lg: 0 10px 30px rgba(79,70,229,0.08), 0 4px 12px rgba(15,23,42,0.06);
+  }
+
+  /* ── 다크 모드 변수 ── */
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0d1117;
+    --bg-grad-1: #161b2e;
+    --bg-grad-2: #1a0f2e;
+    --card-bg: #161b22;
+    --border: #30363d;
+    --border-light: #21262d;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #484f58;
+    --accent: #7c86f5;
+    --accent-hover: #6472f3;
+    --accent-light: #1a1f3a;
+    --tag-bg: #21262d;
+    --urgent-bg: #3d0d1a;
+    --warning-bg: #2d1f00;
+    --safe-bg: #0d2818;
+    --neutral-bg: #1c2128;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+    --shadow: 0 2px 8px rgba(0,0,0,0.35);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
   }
 
   html { color-scheme: light; }
 
   body {
-    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
     background: var(--bg);
     background-image:
       radial-gradient(at 0% 0%, var(--bg-grad-1) 0%, transparent 50%),
@@ -51,12 +76,13 @@
     min-height: 100vh;
     padding: 48px 24px 40px;
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
     letter-spacing: -0.01em;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 
   .container { max-width: 1600px; margin: 0 auto; }
 
+  /* ── 헤더 ── */
   header {
     margin-bottom: 20px;
     padding-bottom: 22px;
@@ -71,65 +97,6 @@
     margin-bottom: 14px;
   }
 
-  .refresh-btn {
-    flex-shrink: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 9px 16px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
-    font-family: inherit;
-    letter-spacing: -0.01em;
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.2);
-  }
-
-  .refresh-btn:hover {
-    background: var(--accent-hover);
-    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3), 0 4px 16px rgba(79, 70, 229, 0.25);
-    transform: translateY(-1px);
-  }
-
-  .refresh-btn:active { transform: scale(0.97); }
-
-  .refresh-btn .refresh-icon { display: inline-block; transition: transform 0.3s ease; }
-
-  .refresh-btn.spinning .refresh-icon { animation: spin 0.6s ease-in-out; }
-
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-
-  .toast {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    background: #111827;
-    color: #fff;
-    padding: 12px 18px;
-    border-radius: 8px;
-    font-size: 13.5px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    opacity: 0;
-    transform: translateY(-10px);
-    transition: opacity 0.25s ease, transform 0.25s ease;
-    pointer-events: none;
-    z-index: 1000;
-    max-width: 360px;
-    line-height: 1.5;
-  }
-
-  .toast.show { opacity: 1; transform: translateY(0); }
-  .toast.error { background: var(--urgent); }
-  .toast-detail { font-size: 11.5px; color: rgba(255,255,255,0.75); margin-top: 4px; }
-
   .title {
     font-size: 30px;
     font-weight: 700;
@@ -141,13 +108,18 @@
     -webkit-text-fill-color: transparent;
   }
 
+  html[data-theme="dark"] .title {
+    background: linear-gradient(135deg, #e6edf3 0%, #7c86f5 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
   .subtitle { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
 
   .meta {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-top: 14px;
     font-size: 12.5px;
     color: var(--text-muted);
     flex-wrap: wrap;
@@ -155,13 +127,32 @@
 
   .meta-divider { color: var(--border); }
 
-  /* ── 툴바 (검색 + 필터) ── */
+  /* ── 다크모드 토글 ── */
+  .dark-btn {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--card-bg);
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, border-color 0.15s, transform 0.2s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .dark-btn:hover { transform: rotate(20deg) scale(1.1); border-color: var(--accent); }
+
+  /* ── 툴바 ── */
   .toolbar {
     display: flex;
     gap: 10px;
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
 
   .search-wrap {
@@ -191,21 +182,17 @@
     background: var(--card-bg);
     color: var(--text-primary);
     outline: none;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: border-color 0.15s, box-shadow 0.15s;
     box-shadow: var(--shadow-sm);
   }
 
   .search-input::placeholder { color: var(--text-muted); }
-
-  .search-input:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-  }
+  .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
 
   .filter-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
 
   .filter-btn {
-    padding: 7px 14px;
+    padding: 7px 13px;
     border: 1px solid var(--border);
     border-radius: 999px;
     background: var(--card-bg);
@@ -214,50 +201,89 @@
     font-weight: 600;
     font-family: inherit;
     cursor: pointer;
-    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: background 0.15s, color 0.15s, border-color 0.15s;
     box-shadow: var(--shadow-sm);
-    letter-spacing: -0.01em;
   }
 
-  .filter-btn:hover {
-    background: var(--accent-light);
-    color: var(--accent);
-    border-color: #e0e7ff;
-  }
+  .filter-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
 
   .filter-btn.active {
     background: var(--accent);
     color: #fff;
     border-color: var(--accent);
-    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.2);
+    box-shadow: 0 1px 2px rgba(79,70,229,0.25), 0 2px 8px rgba(79,70,229,0.2);
   }
 
-  /* 검색 결과 없음 */
-  .no-results {
-    display: none;
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-muted);
-    font-size: 14px;
-    grid-column: 1 / -1;
+  .filter-btn.bookmark-filter-btn.active {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    box-shadow: 0 1px 2px rgba(245,158,11,0.3);
   }
 
-  .no-results-icon { font-size: 36px; margin-bottom: 12px; }
-
-  mark {
-    background: #fef08a;
-    color: var(--text-primary);
-    border-radius: 2px;
-    padding: 0 1px;
+  /* ── 마감 임박 패널 ── */
+  .urgent-panel {
+    background: linear-gradient(135deg, rgba(225,29,72,0.06) 0%, rgba(217,119,6,0.06) 100%);
+    border: 1px solid rgba(225,29,72,0.2);
+    border-radius: 16px;
+    padding: 18px 22px;
+    margin-bottom: 18px;
   }
 
-  .card-hidden { display: none !important; }
-  .announcement-item.item-hidden { display: none; }
+  html[data-theme="dark"] .urgent-panel {
+    background: linear-gradient(135deg, rgba(225,29,72,0.1) 0%, rgba(217,119,6,0.08) 100%);
+  }
 
-  /* ── 그리드 ── */
+  .urgent-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--urgent);
+    text-transform: uppercase;
+  }
+
+  .urgent-count-badge {
+    background: var(--urgent);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 9px;
+    border-radius: 999px;
+  }
+
+  .urgent-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 8px;
+  }
+
+  .urgent-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 14px;
+    background: var(--card-bg);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--border-light);
+    transition: box-shadow 0.15s, border-color 0.15s;
+    min-width: 0;
+  }
+
+  .urgent-item:hover { box-shadow: var(--shadow); border-color: var(--border); }
+
+  .urgent-agency { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: var(--accent-light); color: var(--accent); border: 1px solid rgba(79,70,229,0.2); white-space: nowrap; flex-shrink: 0; }
+
+  .urgent-title { font-size: 12px; font-weight: 600; color: var(--text-primary); flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── 그리드 + 카드 ── */
   .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 18px;
   }
 
@@ -268,9 +294,7 @@
     border-radius: 16px;
     padding: 22px;
     box-shadow: var(--shadow);
-    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
-                border-color 0.2s ease;
+    transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
     min-width: 0;
     overflow: hidden;
   }
@@ -282,11 +306,12 @@
     height: 3px;
     background: linear-gradient(90deg, var(--accent) 0%, #818cf8 50%, #c4b5fd 100%);
     opacity: 0;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s;
   }
 
-  .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: #cbd5e1; }
+  .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: var(--border); }
   .card:hover::before { opacity: 1; }
+  .card-hidden { display: none !important; }
 
   .card-header {
     display: flex;
@@ -299,38 +324,57 @@
   }
 
   .card-title-wrap { flex: 1; min-width: 0; }
-
   .card-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.02em; }
-
   .card-subtitle { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
 
   .card-tag {
     display: inline-block;
     padding: 4px 11px;
-    background: linear-gradient(135deg, var(--accent-light) 0%, #f5f3ff 100%);
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-light) 100%);
     color: var(--accent);
     font-size: 10.5px;
     font-weight: 700;
     border-radius: 999px;
     letter-spacing: 0.04em;
-    border: 1px solid #e0e7ff;
+    border: 1px solid rgba(79,70,229,0.2);
+    flex-shrink: 0;
   }
 
   .section-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-
   .section-label h3 { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
 
-  .view-all { font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.15s ease; }
-  .view-all:hover { color: var(--accent-hover); text-decoration: underline; }
+  .view-all { font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; }
+  .view-all:hover { text-decoration: underline; }
 
   .announcement-list { list-style: none; margin-bottom: 14px; }
 
-  .announcement-item { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
-  .announcement-item:last-child { border-bottom: none; }
+  .announcement-item {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border-light);
+  }
 
-  .announcement-link { display: flex; gap: 10px; text-decoration: none; color: inherit; align-items: flex-start; }
+  .announcement-item:last-child { border-bottom: none; }
+  .announcement-item.item-hidden { display: none; }
+
+  .announcement-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .announcement-link {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
   .announcement-link:hover .announcement-title { color: var(--accent); }
 
+  /* ── D-day 뱃지 ── */
   .dday {
     flex-shrink: 0;
     min-width: 52px;
@@ -344,17 +388,35 @@
     border: 1px solid transparent;
   }
 
-  .dday.urgent { background: var(--urgent-bg); color: var(--urgent); border-color: rgba(225, 29, 72, 0.18); box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.06); }
-  .dday.warning { background: var(--warning-bg); color: var(--warning); border-color: rgba(217, 119, 6, 0.18); }
-  .dday.safe { background: var(--safe-bg); color: var(--safe); border-color: rgba(5, 150, 105, 0.18); }
-  .dday.neutral { background: var(--neutral-bg); color: var(--neutral); border-color: rgba(100, 116, 139, 0.18); }
+  .dday.urgent { background: var(--urgent-bg); color: var(--urgent); border-color: rgba(225,29,72,0.18); box-shadow: 0 0 0 3px rgba(225,29,72,0.06); }
+  .dday.warning { background: var(--warning-bg); color: var(--warning); border-color: rgba(217,119,6,0.18); }
+  .dday.safe { background: var(--safe-bg); color: var(--safe); border-color: rgba(5,150,105,0.18); }
+  .dday.neutral { background: var(--neutral-bg); color: var(--neutral); border-color: rgba(100,116,139,0.18); }
 
   .announcement-content { flex: 1; min-width: 0; }
-
-  .announcement-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.5; margin-bottom: 4px; transition: color 0.15s ease; letter-spacing: -0.01em; }
-
+  .announcement-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.5; margin-bottom: 4px; transition: color 0.15s; letter-spacing: -0.01em; }
   .announcement-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; font-weight: 500; }
 
+  /* ── 북마크 버튼 ── */
+  .bookmark-btn {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    color: var(--text-muted);
+    padding: 3px 4px;
+    border-radius: 6px;
+    transition: color 0.15s, transform 0.15s, background 0.15s;
+    line-height: 1;
+    margin-top: 2px;
+    font-family: inherit;
+  }
+
+  .bookmark-btn:hover { color: #f59e0b; transform: scale(1.2); background: var(--warning-bg); }
+  .bookmark-btn.bookmarked { color: #f59e0b; }
+
+  /* ── 빠른 링크 ── */
   .quick-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-light); }
 
   .quick-link {
@@ -365,12 +427,58 @@
     font-weight: 600;
     text-decoration: none;
     border-radius: 999px;
-    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    transition: background 0.15s, color 0.15s, transform 0.15s;
     border: 1px solid transparent;
   }
 
-  .quick-link:hover { background: var(--accent-light); color: var(--accent); border-color: #e0e7ff; transform: translateY(-1px); }
+  .quick-link:hover { background: var(--accent-light); color: var(--accent); border-color: rgba(79,70,229,0.2); transform: translateY(-1px); }
 
+  /* ── 검색 하이라이트 ── */
+  mark { background: #fef08a; color: var(--text-primary); border-radius: 2px; padding: 0 1px; }
+  html[data-theme="dark"] mark { background: #854d0e; color: #fef9c3; }
+
+  /* ── 빈 공고 안내 ── */
+  .empty-notice {
+    text-align: center;
+    padding: 24px 0;
+    color: var(--text-muted);
+    font-size: 12.5px;
+    line-height: 1.7;
+  }
+
+  /* ── 검색 결과 없음 ── */
+  .no-results {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    grid-column: 1 / -1;
+  }
+
+  /* ── 토스트 ── */
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #111827;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.25s, transform 0.25s;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 320px;
+    line-height: 1.5;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  /* ── 푸터 ── */
   footer {
     margin-top: 44px;
     padding-top: 22px;
@@ -381,11 +489,22 @@
     line-height: 1.7;
   }
 
+  .footer-notice {
+    color: var(--warning);
+    background: linear-gradient(135deg, var(--warning-bg) 0%, #fef9c3 100%);
+    padding: 11px 18px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: inline-block;
+    font-weight: 500;
+    border: 1px solid rgba(217,119,6,0.15);
+  }
+
   .footer-contact {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 12px;
     padding: 10px 20px;
     background: var(--card-bg);
     border: 1px solid var(--border);
@@ -395,36 +514,19 @@
     box-shadow: var(--shadow-sm);
   }
 
-  .footer-contact a {
-    color: var(--accent);
-    text-decoration: none;
-    font-weight: 600;
-  }
+  .footer-contact a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  .footer-contact a:hover { text-decoration: underline; }
 
-  .footer-contact a:hover {
-    text-decoration: underline;
-  }
-
-  .footer-notice {
-    color: var(--warning);
-    background: linear-gradient(135deg, var(--warning-bg) 0%, #fef9c3 100%);
-    padding: 11px 18px;
-    border-radius: 10px;
-    margin-bottom: 12px;
-    display: inline-block;
-    font-weight: 500;
-    border: 1px solid rgba(217, 119, 6, 0.15);
-  }
-
+  /* ── 모바일 ── */
   @media (max-width: 700px) {
     body { padding: 24px 14px 28px; }
     .title { font-size: 23px; }
     .grid { grid-template-columns: 1fr; }
     .card { padding: 18px; border-radius: 14px; }
-    .dday { min-width: 48px; }
-    .refresh-btn { padding: 8px 14px; font-size: 12px; }
+    .dday { min-width: 46px; }
     .toolbar { gap: 8px; }
     .search-wrap { max-width: 100%; }
+    .urgent-items { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -437,13 +539,14 @@
           <h1 class="title">정부과제 공고 대시보드</h1>
           <p class="subtitle">기관별 사업공고를 한눈에 확인하세요</p>
         </div>
+        <button class="dark-btn" id="darkBtn" onclick="toggleDark()" title="다크모드 전환">🌙</button>
       </div>
       <div class="meta">
         <span>뉴로핏 정부과제 PM</span>
         <span class="meta-divider">·</span>
         <span id="today"></span>
         <span class="meta-divider">·</span>
-        <span>데이터 기준: <span id="dataDate">2026-05-29</span></span>
+        <span>데이터 기준: <span id="dataDate">2026-05-22</span></span>
       </div>
     </header>
 
@@ -451,30 +554,37 @@
     <div class="toolbar">
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input
-          class="search-input"
-          id="searchInput"
-          type="text"
-          placeholder="공고 제목 검색..."
-          oninput="handleSearch()"
-          autocomplete="off"
-        >
+        <input class="search-input" id="searchInput" type="text"
+          placeholder="공고 제목 검색..." oninput="handleSearch()" autocomplete="off">
       </div>
       <div class="filter-wrap">
         <button class="filter-btn active" data-filter="all" onclick="handleFilter(this)">전체</button>
+        <button class="filter-btn bookmark-filter-btn" data-filter="bookmark" onclick="handleFilter(this)">★ 북마크</button>
         <button class="filter-btn" data-filter="NIPA" onclick="handleFilter(this)">NIPA</button>
         <button class="filter-btn" data-filter="KHIDI" onclick="handleFilter(this)">KHIDI</button>
         <button class="filter-btn" data-filter="GJTP" onclick="handleFilter(this)">GJTP</button>
         <button class="filter-btn" data-filter="DGTP" onclick="handleFilter(this)">DGTP</button>
         <button class="filter-btn" data-filter="PPI" onclick="handleFilter(this)">PPI</button>
+        <button class="filter-btn" data-filter="IITP" onclick="handleFilter(this)">IITP</button>
+        <button class="filter-btn" data-filter="NIA" onclick="handleFilter(this)">NIA</button>
+        <button class="filter-btn" data-filter="NECA" onclick="handleFilter(this)">NECA</button>
       </div>
+    </div>
+
+    <!-- 마감 임박 패널 (JS로 자동 생성) -->
+    <div class="urgent-panel" id="urgentPanel" style="display:none">
+      <div class="urgent-header">
+        <span>🚨 마감 임박 (D-10 이내)</span>
+        <span class="urgent-count-badge" id="urgentCount">0건</span>
+      </div>
+      <div class="urgent-items" id="urgentItems"></div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <main class="grid" id="cardGrid">
 
-      <!-- 정보통신산업진흥원 (NIPA) -->
+      <!-- NIPA -->
       <section class="card" data-agency="NIPA">
         <div class="card-header">
           <div class="card-title-wrap">
@@ -483,80 +593,72 @@
           </div>
           <span class="card-tag">NIPA</span>
         </div>
-
         <div class="section-label">
           <h3>📢 최신 사업공고</h3>
           <a class="view-all" href="https://www.nipa.kr/home/bsnsAll/0/nttList?bbsNo=4&tab=2" target="_blank" rel="noopener">전체보기 →</a>
         </div>
-
         <ul class="announcement-list">
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16795" target="_blank" rel="noopener">
-              <span class="dday safe">D-28</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년도 AX 원스톱 바우처 지원사업 수요기업 추가 모집 공고</div>
-                <div class="announcement-meta">
-                  <span>등록 2026-05-28</span>
-                  <span>·</span>
-                  <span>마감 2026-06-26 15:00</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16774" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-12">D-23</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">호치민IT지원센터 2026년 7월 입주기업 모집 공고</div>
+                  <div class="announcement-meta"><span>등록 2026-05-18</span><span>·</span><span>마감 2026-06-12 15:00</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16774" target="_blank" rel="noopener">
-              <span class="dday safe">D-14</span>
-              <div class="announcement-content">
-                <div class="announcement-title">호치민IT지원센터 2026년 7월 입주기업 모집 계획(3인실, 2실 모집)</div>
-                <div class="announcement-meta">
-                  <span>등록 2026-05-18</span>
-                  <span>·</span>
-                  <span>마감 2026-06-12 15:00</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16764" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-08">D-19</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년도 「AI 청년창업기업 동반성장 바우처」 사업 수요기업 모집 공고</div>
+                  <div class="announcement-meta"><span>등록 2026-05-08</span><span>·</span><span>마감 2026-06-08 15:00</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16764" target="_blank" rel="noopener">
-              <span class="dday warning">D-10</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년도 「AI 청년창업기업 동반성장 바우처」 사업 수요기업 모집 공고</div>
-                <div class="announcement-meta">
-                  <span>등록 2026-05-08</span>
-                  <span>·</span>
-                  <span>마감 2026-06-08 15:00</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16758" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-05">D-16</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 AX디바이스 개발·실증(정규트랙) 사업 수요기업 모집 공고</div>
+                  <div class="announcement-meta"><span>등록 2026-05-07</span><span>·</span><span>마감 2026-06-05 15:00</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16758" target="_blank" rel="noopener">
-              <span class="dday warning">D-7</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년 AX디바이스 개발·실증(정규트랙) 사업 수요기업 모집 공고</div>
-                <div class="announcement-meta">
-                  <span>등록 2026-05-07</span>
-                  <span>·</span>
-                  <span>마감 2026-06-05 15:00</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16756" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-04">D-15</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 「조선 AX 특화 AI 모델하우스 구축·실증사업」 신규과제 모집공고</div>
+                  <div class="announcement-meta"><span>등록 2026-05-06</span><span>·</span><span>마감 2026-06-04 14:00</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16756" target="_blank" rel="noopener">
-              <span class="dday warning">D-6</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년「조선 AX 특화 AI 모델하우스 구축·실증사업」신규과제 모집공고</div>
-                <div class="announcement-meta">
-                  <span>등록 2026-05-06</span>
-                  <span>·</span>
-                  <span>마감 2026-06-04 14:00</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16752" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-23">D-3</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 「수출 유망 디지털콘텐츠 강소기업 육성」 지원기업 추가모집 공고</div>
+                  <div class="announcement-meta"><span>등록 2026-05-04</span><span>·</span><span>마감 2026-05-23 14:00</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
         </ul>
-
         <div class="quick-links">
           <a class="quick-link" href="https://www.nipa.kr/home/2-1" target="_blank" rel="noopener">공지사항</a>
           <a class="quick-link" href="https://www.nipa.kr/home/2-3" target="_blank" rel="noopener">입찰공고</a>
@@ -565,7 +667,7 @@
         </div>
       </section>
 
-      <!-- 한국보건산업진흥원 (KHIDI) -->
+      <!-- KHIDI -->
       <section class="card" data-agency="KHIDI">
         <div class="card-header">
           <div class="card-title-wrap">
@@ -574,86 +676,72 @@
           </div>
           <span class="card-tag">KHIDI</span>
         </div>
-
         <div class="section-label">
           <h3>📢 최신 사업공고</h3>
           <a class="view-all" href="https://www.khidi.or.kr/board?menuId=MENU01108" target="_blank" rel="noopener">전체보기 →</a>
         </div>
-
         <ul class="announcement-list">
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=937&linkId=48945430&menuId=MENU01108" target="_blank" rel="noopener">
-              <span class="dday neutral">진행</span>
-              <div class="announcement-content">
-                <div class="announcement-title">의료기기 전문가 자문위원회(MDCC) 전문위원 모집 공고</div>
-                <div class="announcement-meta">
-                  <span>No. 937</span>
-                  <span>·</span>
-                  <span>등록 2026-05-28</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=935&linkId=48944842&menuId=MENU01108" target="_blank" rel="noopener">
+                <span class="dday neutral" data-deadline="">진행</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">「AI 활용 신규 외국인환자 유치의료기관 홍보영상 제작지원」 사업 참가 기관 모집</div>
+                  <div class="announcement-meta"><span>No. 935</span><span>·</span><span>등록 2026-05-20</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=936&linkId=48945157&menuId=MENU01108" target="_blank" rel="noopener">
-              <span class="dday safe">D-17</span>
-              <div class="announcement-content">
-                <div class="announcement-title">글로벌 마케팅 비용지원(의료기기) 사업 수행기업(2차) 모집</div>
-                <div class="announcement-meta">
-                  <span>No. 936</span>
-                  <span>·</span>
-                  <span>등록 2026-05-26</span>
-                  <span>·</span>
-                  <span>마감 2026-06-15</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=934&linkId=48944768&menuId=MENU01108" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-01">D-12</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년도 보건산업혁신창업센터 혁신창업멤버스 기업 모집 연장공고(~6/1(월) 16시)</div>
+                  <div class="announcement-meta"><span>No. 934</span><span>·</span><span>등록 2026-05-19</span><span>·</span><span>마감 2026-06-01</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=935&linkId=48944842&menuId=MENU01108" target="_blank" rel="noopener">
-              <span class="dday neutral">진행</span>
-              <div class="announcement-content">
-                <div class="announcement-title">「AI 활용 신규 외국인환자 유치의료기관 홍보영상 제작지원」 사업 참가 기관 모집</div>
-                <div class="announcement-meta">
-                  <span>No. 935</span>
-                  <span>·</span>
-                  <span>등록 2026-05-20</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=933&linkId=48944759&menuId=MENU01108" target="_blank" rel="noopener">
+                <span class="dday warning" data-deadline="2026-05-29">D-9</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 의약품 생산시설 글로벌 GMP 인증 등 규제 지원 사업 수행기관 2차 모집</div>
+                  <div class="announcement-meta"><span>No. 933</span><span>·</span><span>등록 2026-05-19</span><span>·</span><span>마감 2026-05-29</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=934&linkId=48944768&menuId=MENU01108" target="_blank" rel="noopener">
-              <span class="dday urgent">D-3</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년도 보건산업혁신창업센터 혁신창업멤버스 기업 모집 연장공고(~6/1(월) 16시까지)</div>
-                <div class="announcement-meta">
-                  <span>No. 934</span>
-                  <span>·</span>
-                  <span>등록 2026-05-19</span>
-                  <span>·</span>
-                  <span>마감 2026-06-01</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=932&linkId=48944711&menuId=MENU01108" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-04">D-15</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 바이오헬스 특허 및 인허가 컨설팅 지원사업 창업기업 모집공고(2차)</div>
+                  <div class="announcement-meta"><span>No. 932</span><span>·</span><span>등록 2026-05-15</span><span>·</span><span>마감 2026-06-04</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=933&linkId=48944759&menuId=MENU01108" target="_blank" rel="noopener">
-              <span class="dday urgent">D-0</span>
-              <div class="announcement-content">
-                <div class="announcement-title">★2026년 의약품 생산시설 글로벌 GMP 인증 등 규제 지원 사업 수행기관 2차 모집 공고(기한 연장, ~5.29)★</div>
-                <div class="announcement-meta">
-                  <span>No. 933</span>
-                  <span>·</span>
-                  <span>등록 2026-05-19</span>
-                  <span>·</span>
-                  <span>마감 2026-05-29</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=931&linkId=48944408&menuId=MENU01108" target="_blank" rel="noopener">
+                <span class="dday warning" data-deadline="2026-05-29">D-9</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 혁신제품 지정기간 연장(2차 연장) 공고(5.18~5.29)</div>
+                  <div class="announcement-meta"><span>No. 931</span><span>·</span><span>등록 2026-05-12</span><span>·</span><span>마감 2026-05-29</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
         </ul>
-
         <div class="quick-links">
           <a class="quick-link" href="https://www.khidi.or.kr/kps" target="_blank" rel="noopener">보건산업종합</a>
           <a class="quick-link" href="https://www.khidi.or.kr/mdtis" target="_blank" rel="noopener">의료기기 종합정보</a>
@@ -662,7 +750,7 @@
         </div>
       </section>
 
-      <!-- 광주테크노파크 (GJTP) -->
+      <!-- GJTP -->
       <section class="card" data-agency="GJTP">
         <div class="card-header">
           <div class="card-title-wrap">
@@ -671,80 +759,72 @@
           </div>
           <span class="card-tag">GJTP</span>
         </div>
-
         <div class="section-label">
           <h3>📢 최신 사업공고</h3>
           <a class="view-all" href="https://www.gjtp.or.kr/home/business.cs?m=8" target="_blank" rel="noopener">전체보기 →</a>
         </div>
-
         <ul class="announcement-list">
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2188" target="_blank" rel="noopener">
-              <span class="dday safe">D-12</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년 온디바이스 AI 성장단계별 스케일업 지원사업 2차 추가공모</div>
-                <div class="announcement-meta">
-                  <span>No. 1707</span>
-                  <span>·</span>
-                  <span>2026-05-27 ~ 2026-06-10</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2176" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-02">D-13</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">KDB NEXTONE 광주 1기 모집 공고</div>
+                  <div class="announcement-meta"><span>No. 1696</span><span>·</span><span>2026-05-06 ~ 2026-06-02</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2187" target="_blank" rel="noopener">
-              <span class="dday safe">D-18</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026 창업기업제품 실증지원사업 참여기업 모집 통합공고(2차)</div>
-                <div class="announcement-meta">
-                  <span>No. 1706</span>
-                  <span>·</span>
-                  <span>2026-05-27 ~ 2026-06-16</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2175" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-22">D-2</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">예비창업가 기술창업 네트워킹</div>
+                  <div class="announcement-meta"><span>No. 1695</span><span>·</span><span>2026-05-13 ~ 2026-05-22</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2186" target="_blank" rel="noopener">
-              <span class="dday safe">D-16</span>
-              <div class="announcement-content">
-                <div class="announcement-title">내일을 만드는 청년 직무형 일경험 참여자 모집</div>
-                <div class="announcement-meta">
-                  <span>No. 1705</span>
-                  <span>·</span>
-                  <span>2026-05-19 ~ 2026-06-14</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2174" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-04">D-15</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">호남 엔젤리더스포럼 청년 스타트업 살롱 in 광주전남</div>
+                  <div class="announcement-meta"><span>No. 1694</span><span>·</span><span>2026-05-15 ~ 2026-06-04</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2185" target="_blank" rel="noopener">
-              <span class="dday safe">D-18</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년도 시군구연고산업육성 협업프로젝트 지원모집 공고 - 광주 동구 AI헬스케어 스타트업 육성사업</div>
-                <div class="announcement-meta">
-                  <span>No. 1704</span>
-                  <span>·</span>
-                  <span>2026-05-27 ~ 2026-06-16</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2173" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-22">D-2</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">「광주 인공지능사관학교 AI 도약과정 위탁운영」 제안서 평가위원(후보자) 공개 모집 공고</div>
+                  <div class="announcement-meta"><span>No. 1693</span><span>·</span><span>2026-05-15 ~ 2026-05-22</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2184" target="_blank" rel="noopener">
-              <span class="dday warning">D-10</span>
-              <div class="announcement-content">
-                <div class="announcement-title">KOICA 사업제안서 작성 및 성과관리 교육 참여자 모집</div>
-                <div class="announcement-meta">
-                  <span>No. 1703</span>
-                  <span>·</span>
-                  <span>2026-05-26 ~ 2026-06-08</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2172" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-20">오늘</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 「광주 북구 AI일자리잡고+ 원스톱 지원사업」 참여기업 모집 공고</div>
+                  <div class="announcement-meta"><span>No. 1692</span><span>·</span><span>2026-04-22 ~ 2026-05-20</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
         </ul>
-
         <div class="quick-links">
           <a class="quick-link" href="https://www.gjtp.or.kr/home/sub.cs?m=14" target="_blank" rel="noopener">일반공지</a>
           <a class="quick-link" href="https://www.gjtp.or.kr/home/board/B0010.cs?m=11" target="_blank" rel="noopener">보도자료</a>
@@ -753,7 +833,7 @@
         </div>
       </section>
 
-      <!-- 대구테크노파크 (DGTP) -->
+      <!-- DGTP -->
       <section class="card" data-agency="DGTP">
         <div class="card-header">
           <div class="card-title-wrap">
@@ -762,69 +842,80 @@
           </div>
           <span class="card-tag">DGTP</span>
         </div>
-
         <div class="section-label">
           <h3>📢 최신 사업공고</h3>
           <a class="view-all" href="https://dgtp.or.kr/bbs/BoardControll.do?bbsId=BBSMSTR_000000000003" target="_blank" rel="noopener">전체보기 →</a>
         </div>
-
         <ul class="announcement-list">
           <li class="announcement-item">
-            <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15462" target="_blank" rel="noopener">
-              <span class="dday safe">D-17</span>
-              <div class="announcement-content">
-                <div class="announcement-title">「로봇 기반 공간컴퓨팅 창업지원」 2026년 예비창업 및 초기창업기업 지원기업 모집공고</div>
-                <div class="announcement-meta">
-                  <span>No. 2115</span>
-                  <span>·</span>
-                  <span>AX산업본부</span>
-                  <span>·</span>
-                  <span>2026-05-12 ~ 06-15</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15470" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-22">D-2</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">[2026년 AI 기반 바이오 소재 융복합 제품의 적용·검증 및 시장진출 사업] 기업지원 수혜기업 모집 통합 공고(연장공고)</div>
+                  <div class="announcement-meta"><span>No. 2116</span><span>·</span><span>의료바이오산업본부</span><span>·</span><span>2026-05-14 ~ 05-22</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15460" target="_blank" rel="noopener">
-              <span class="dday urgent">D-0</span>
-              <div class="announcement-content">
-                <div class="announcement-title">「2026년 대구 중소기업 밀집지역 위기대응 체계 구축사업」 대구광역시 지역 중소기업 밀집지역 생태계 공동회복 지원과제 수요기업 모집공고(연장)</div>
-                <div class="announcement-meta">
-                  <span>No. 2114</span>
-                  <span>·</span>
-                  <span>기업지원단</span>
-                  <span>·</span>
-                  <span>2026-05-11 ~ 05-29</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15462" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-06-15">D-26</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">「로봇 기반 공간컴퓨팅 창업지원」 2026년 예비창업 및 초기창업기업 지원기업 모집공고</div>
+                  <div class="announcement-meta"><span>No. 2115</span><span>·</span><span>AX산업본부</span><span>·</span><span>2026-05-12 ~ 06-15</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15456" target="_blank" rel="noopener">
-              <span class="dday safe">D-155</span>
-              <div class="announcement-content">
-                <div class="announcement-title">「2026년 기술혁신전문가(기술닥터) 지원사업」 공고</div>
-                <div class="announcement-meta">
-                  <span>No. 2112</span>
-                  <span>·</span>
-                  <span>기업지원단</span>
-                  <span>·</span>
-                  <span>2026-05-07 ~ 10-31</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15460" target="_blank" rel="noopener">
+                <span class="dday warning" data-deadline="2026-05-29">D-9</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">「2026년 대구 중소기업 밀집지역 위기대응 체계 구축사업」 수요기업 모집공고(연장)</div>
+                  <div class="announcement-meta"><span>No. 2114</span><span>·</span><span>기업지원단</span><span>·</span><span>2026-05-11 ~ 05-29</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
+          </li>
+          <li class="announcement-item">
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15456" target="_blank" rel="noopener">
+                <span class="dday safe" data-deadline="2026-10-31">D-164</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">「2026년 기술혁신전문가(기술닥터) 지원사업」 공고</div>
+                  <div class="announcement-meta"><span>No. 2112</span><span>·</span><span>기업지원단</span><span>·</span><span>2026-05-07 ~ 10-31</span></div>
+                </div>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
+          </li>
+          <li class="announcement-item">
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15454" target="_blank" rel="noopener">
+                <span class="dday urgent" data-deadline="2026-05-20">오늘</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">의료·헬스케어 상용화 제품개발 및 기술검증(PoC) 지원사업 수혜기업 모집 공고</div>
+                  <div class="announcement-meta"><span>No. 2111</span><span>·</span><span>의료바이오산업본부</span><span>·</span><span>2026-05-07 ~ 05-20</span></div>
+                </div>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
         </ul>
-
         <div class="quick-links">
           <a class="quick-link" href="https://dpis.or.kr/page/businessList.do" target="_blank" rel="noopener">기업지원시스템(DPIS)</a>
           <a class="quick-link" href="https://dgtp.or.kr/bbs/BoardControll.do?bbsId=BBSMSTR_000000000004" target="_blank" rel="noopener">채용공고</a>
           <a class="quick-link" href="http://www.star.daegu.kr" target="_blank" rel="noopener">대구스타기업</a>
-          <a class="quick-link" href="http://www.hittp.org" target="_blank" rel="noopener">대구하나로</a>
         </div>
       </section>
 
-      <!-- 혁신장터 (PPI) -->
+      <!-- PPI -->
       <section class="card" data-agency="PPI">
         <div class="card-header">
           <div class="card-title-wrap">
@@ -833,92 +924,162 @@
           </div>
           <span class="card-tag">PPI</span>
         </div>
-
         <div class="section-label">
           <h3>📢 혁신제품 시범구매 공지</h3>
           <a class="view-all" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsList_usr.do" target="_blank" rel="noopener">전체보기 →</a>
         </div>
-
         <ul class="announcement-list">
           <li class="announcement-item">
-            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000009331" target="_blank" rel="noopener">
-              <span class="dday neutral">안내</span>
-              <div class="announcement-content">
-                <div class="announcement-title">(수정)혁신제품 시범사용 기본계획서 상시 접수 안내('26.4.2.)</div>
-                <div class="announcement-meta">
-                  <span>No. 147</span>
-                  <span>·</span>
-                  <span>상시 접수</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030526" target="_blank" rel="noopener">
+                <span class="dday warning" data-deadline="2026-05-29">D-9</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">'26년 3차 혁신제품 시범구매 기본계획서 마감안내 ('26.5.29.까지)</div>
+                  <div class="announcement-meta"><span>No. 146</span><span>·</span><span>등록 2026-05-08</span><span>·</span><span>마감 2026-05-29</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030526" target="_blank" rel="noopener">
-              <span class="dday urgent">D-0</span>
-              <div class="announcement-content">
-                <div class="announcement-title">'26년 3차 혁신제품 시범구매 기본계획서 마감안내 ('26.5.29.까지)</div>
-                <div class="announcement-meta">
-                  <span>No. 146</span>
-                  <span>·</span>
-                  <span>등록 2026-05-08</span>
-                  <span>·</span>
-                  <span>마감 2026-05-29</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030473" target="_blank" rel="noopener">
+                <span class="dday neutral" data-deadline="">안내</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">(26년 2차) 혁신제품 시범사용 결과 공개 - 해외실증</div>
+                  <div class="announcement-meta"><span>No. 145</span><span>·</span><span>등록 2026-04-29</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030473" target="_blank" rel="noopener">
-              <span class="dday neutral">안내</span>
-              <div class="announcement-content">
-                <div class="announcement-title">(26년 2차) 혁신제품 시범사용 결과 공개 - 해외실증</div>
-                <div class="announcement-meta">
-                  <span>No. 145</span>
-                  <span>·</span>
-                  <span>등록 2026-04-29</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030451" target="_blank" rel="noopener">
+                <span class="dday neutral" data-deadline="">안내</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 2차(구매) 혁신제품 시범사용 구매계약 일정 및 제출서류 안내</div>
+                  <div class="announcement-meta"><span>No. 144</span><span>·</span><span>등록 2026-04-27</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030451" target="_blank" rel="noopener">
-              <span class="dday neutral">안내</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년 2차(구매) 혁신제품 시범사용 구매계약 일정 및 제출서류 안내</div>
-                <div class="announcement-meta">
-                  <span>No. 144</span>
-                  <span>·</span>
-                  <span>등록 2026-04-27</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030440" target="_blank" rel="noopener">
+                <span class="dday neutral" data-deadline="">결과</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">2026년 제2차 혁신제품 시범구매 선정결과 알림</div>
+                  <div class="announcement-meta"><span>No. 143</span><span>·</span><span>등록 2026-04-27</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
           <li class="announcement-item">
-            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030440" target="_blank" rel="noopener">
-              <span class="dday neutral">결과</span>
-              <div class="announcement-content">
-                <div class="announcement-title">2026년 제2차 혁신제품 시범구매 선정결과 알림</div>
-                <div class="announcement-meta">
-                  <span>No. 143</span>
-                  <span>·</span>
-                  <span>등록 2026-04-27</span>
+            <div class="announcement-row">
+              <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000030407" target="_blank" rel="noopener">
+                <span class="dday neutral" data-deadline="">안내</span>
+                <div class="announcement-content">
+                  <div class="announcement-title">(26년 2차) 혁신제품 시범사용 결과 공개 - 국내실증3</div>
+                  <div class="announcement-meta"><span>No. 142</span><span>·</span><span>등록 2026-04-22</span></div>
                 </div>
-              </div>
-            </a>
+              </a>
+              <button class="bookmark-btn" onclick="toggleBookmark(this)" title="북마크">☆</button>
+            </div>
           </li>
         </ul>
-
         <div class="quick-links">
           <a class="quick-link" href="https://ppi.g2b.go.kr:8914/portal/intro.do" target="_blank" rel="noopener">PPI 메인</a>
           <a class="quick-link" href="https://ppi.g2b.go.kr:8914/sm/dm/smDmMain.do" target="_blank" rel="noopener">혁신제품 전용몰</a>
           <a class="quick-link" href="https://ppi.g2b.go.kr:8914/sm/dm/mp/test/testApplNtceList.do" target="_blank" rel="noopener">시범사용 신청</a>
-          <a class="quick-link" href="https://techmarket.kr" target="_blank" rel="noopener">techmarket.kr ↗</a>
+        </div>
+      </section>
+
+      <!-- IITP -->
+      <section class="card" data-agency="IITP">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">정보통신기획평가원</h2>
+            <p class="card-subtitle">IITP · Institute of Information &amp; Communications Technology Planning &amp; Evaluation</p>
+          </div>
+          <span class="card-tag">IITP</span>
+        </div>
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.iitp.kr/kr/1/biz/biz.it" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <div class="empty-notice">
+              다음 자동 업데이트(매일 09:00 / 18:00) 시 공고가 표시됩니다.
+            </div>
+          </li>
+        </ul>
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.iitp.kr/kr/1/biz/biz.it" target="_blank" rel="noopener">사업공고</a>
+          <a class="quick-link" href="https://www.iitp.kr/kr/1/notice/notice.it" target="_blank" rel="noopener">공지사항</a>
+          <a class="quick-link" href="https://www.iris.go.kr/" target="_blank" rel="noopener">IRIS ↗</a>
+        </div>
+      </section>
+
+      <!-- NIA -->
+      <section class="card" data-agency="NIA">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">한국지능정보사회진흥원</h2>
+            <p class="card-subtitle">NIA · National Information Society Agency</p>
+          </div>
+          <span class="card-tag">NIA</span>
+        </div>
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.nia.or.kr/site/nia_kor/ex/bbs/List.do?cbIdx=82080" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <div class="empty-notice">
+              다음 자동 업데이트(매일 09:00 / 18:00) 시 공고가 표시됩니다.
+            </div>
+          </li>
+        </ul>
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.nia.or.kr/site/nia_kor/ex/bbs/List.do?cbIdx=82080" target="_blank" rel="noopener">사업공고</a>
+          <a class="quick-link" href="https://www.nia.or.kr/" target="_blank" rel="noopener">NIA 홈</a>
+          <a class="quick-link" href="https://www.data.go.kr/" target="_blank" rel="noopener">데이터포털 ↗</a>
+        </div>
+      </section>
+
+      <!-- NECA -->
+      <section class="card" data-agency="NECA">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">한국보건의료연구원</h2>
+            <p class="card-subtitle">NECA · National Evidence-based Healthcare Collaborating Agency</p>
+          </div>
+          <span class="card-tag">NECA</span>
+        </div>
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.neca.re.kr/lay1/bbs/S1T11C148/A/list.do" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <div class="empty-notice">
+              다음 자동 업데이트(매일 09:00 / 18:00) 시 공고가 표시됩니다.
+            </div>
+          </li>
+        </ul>
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.neca.re.kr/lay1/bbs/S1T11C148/A/list.do" target="_blank" rel="noopener">사업공고</a>
+          <a class="quick-link" href="https://www.neca.re.kr/" target="_blank" rel="noopener">NECA 홈</a>
+          <a class="quick-link" href="https://www.hira.or.kr/" target="_blank" rel="noopener">심평원 ↗</a>
         </div>
       </section>
 
       <div class="no-results" id="noResults">
-        <div class="no-results-icon">🔍</div>
+        <div style="font-size:36px;margin-bottom:12px">🔍</div>
         <div>검색 결과가 없습니다.</div>
       </div>
 
@@ -926,7 +1087,7 @@
 
     <footer>
       <div class="footer-notice">
-        ⚠️ 본 페이지의 공고 데이터는 <strong id="footerDate">2026-05-29</strong> 기준입니다. 실제 신청 전에는 반드시 각 기관 홈페이지에서 최신 정보를 확인하세요.
+        ⚠️ 공고 데이터 기준: <strong id="footerDate">2026-05-22</strong> · 실제 신청 전 각 기관 홈페이지에서 최신 정보를 반드시 확인하세요.
       </div>
       <div>
         <span class="footer-contact">
@@ -939,51 +1100,137 @@
   </div>
 
 <script>
-  // 오늘 날짜 표시
-  const today = new Date();
-  document.getElementById('today').textContent = today.toLocaleDateString('ko-KR', {
+  // ── 오늘 날짜 표시 ──
+  document.getElementById('today').textContent = new Date().toLocaleDateString('ko-KR', {
     year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
   });
 
-  // 토스트
-  function showToast(message, detail, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.className = 'toast' + (isError ? ' error' : '');
-    toast.innerHTML = `<div>${message}</div>` + (detail ? `<div class="toast-detail">${detail}</div>` : '');
-    void toast.offsetWidth;
-    toast.classList.add('show');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => toast.classList.remove('show'), 4000);
+  // ── 다크모드 ──
+  function toggleDark() {
+    const html = document.documentElement;
+    const dark = html.getAttribute('data-theme') !== 'dark';
+    html.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.getElementById('darkBtn').textContent = dark ? '☀️' : '🌙';
+    localStorage.setItem('gov-theme', dark ? 'dark' : 'light');
   }
 
-  // 클립보드 복사
-  async function copyRefreshPrompt() {
-    const prompt = '정부과제 공고 대시보드(gov_project_dashboard.html)를 지금 업데이트해줘. NIPA, KHIDI, GJTP, DGTP, PPI 다섯 기관의 최신 사업공고 5개씩 가져오고, 마감된 공고는 제외해줘.';
-    const btn = document.getElementById('refreshBtn');
-    btn.classList.add('spinning');
-    setTimeout(() => btn.classList.remove('spinning'), 600);
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(prompt);
-        showToast('✅ 프롬프트가 복사되었습니다', 'Cowork 채팅창에 Ctrl+V로 붙여넣고 Enter를 누르세요.');
-        return;
+  (function initTheme() {
+    const t = localStorage.getItem('gov-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', t);
+    document.getElementById('darkBtn').textContent = t === 'dark' ? '☀️' : '🌙';
+  })();
+
+  // ── D-day 자동 계산 ──
+  function calcDiff(deadlineStr) {
+    if (!deadlineStr) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const dl = new Date(deadlineStr);
+    dl.setHours(0, 0, 0, 0);
+    return Math.round((dl - today) / 86400000);
+  }
+
+  function getDdayClass(diff) {
+    if (diff <= 5) return 'urgent';
+    if (diff <= 10) return 'warning';
+    return 'safe';
+  }
+
+  function getDdayText(diff) {
+    if (diff < 0) return '마감';
+    if (diff === 0) return '오늘';
+    return 'D-' + diff;
+  }
+
+  function recalcDdays() {
+    document.querySelectorAll('.dday[data-deadline]').forEach(el => {
+      const dl = el.dataset.deadline;
+      if (!dl) return; // neutral 유지
+      const diff = calcDiff(dl);
+      if (diff === null) return;
+      el.className = 'dday ' + getDdayClass(diff);
+      el.textContent = getDdayText(diff);
+    });
+  }
+
+  // ── 마감 임박 패널 ──
+  function buildUrgentPanel() {
+    const items = [];
+    document.querySelectorAll('.card[data-agency]:not(.card-hidden) .announcement-item:not(.item-hidden)').forEach(item => {
+      const dday = item.querySelector('.dday[data-deadline]');
+      if (!dday || !dday.dataset.deadline) return;
+      const diff = calcDiff(dday.dataset.deadline);
+      if (diff === null || diff < 0 || diff > 10) return;
+      const link = item.querySelector('.announcement-link');
+      const title = item.querySelector('.announcement-title');
+      const agency = item.closest('.card[data-agency]').dataset.agency;
+      if (link && title) items.push({ diff, href: link.href, title: title.dataset.original || title.textContent, agency });
+    });
+
+    items.sort((a, b) => a.diff - b.diff);
+    const panel = document.getElementById('urgentPanel');
+    const list = document.getElementById('urgentItems');
+    document.getElementById('urgentCount').textContent = items.length + '건';
+
+    if (items.length === 0) { panel.style.display = 'none'; return; }
+
+    panel.style.display = '';
+    list.innerHTML = items.map(it => {
+      const cls = getDdayClass(it.diff);
+      const txt = getDdayText(it.diff);
+      return `<a class="urgent-item" href="${it.href}" target="_blank" rel="noopener">
+        <span class="dday ${cls}" style="min-width:44px;font-size:10px">${txt}</span>
+        <span class="urgent-agency">${it.agency}</span>
+        <span class="urgent-title">${it.title}</span>
+      </a>`;
+    }).join('');
+  }
+
+  // ── 북마크 ──
+  function getBookmarks() {
+    return JSON.parse(localStorage.getItem('gov-bookmarks') || '[]');
+  }
+
+  function saveBookmarks(bm) {
+    localStorage.setItem('gov-bookmarks', JSON.stringify(bm));
+  }
+
+  function toggleBookmark(btn) {
+    const link = btn.closest('.announcement-item').querySelector('.announcement-link');
+    const url = link.href;
+    const bm = getBookmarks();
+    const idx = bm.indexOf(url);
+    if (idx === -1) { bm.push(url); btn.classList.add('bookmarked'); btn.textContent = '★'; }
+    else { bm.splice(idx, 1); btn.classList.remove('bookmarked'); btn.textContent = '☆'; }
+    saveBookmarks(bm);
+    showToast(idx === -1 ? '★ 북마크 추가됨' : '북마크 해제됨');
+    if (activeFilter === 'bookmark') applyAll();
+  }
+
+  function loadBookmarks() {
+    const bm = getBookmarks();
+    bm.forEach(url => {
+      const link = document.querySelector(`.announcement-link[href="${url}"]`);
+      if (link) {
+        const btn = link.closest('.announcement-item').querySelector('.bookmark-btn');
+        if (btn) { btn.classList.add('bookmarked'); btn.textContent = '★'; }
       }
-      const ta = document.createElement('textarea');
-      ta.value = prompt;
-      ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta);
-      ta.select();
-      const ok = document.execCommand('copy');
-      document.body.removeChild(ta);
-      if (ok) showToast('✅ 프롬프트가 복사되었습니다', 'Cowork 채팅창에 Ctrl+V로 붙여넣고 Enter를 누르세요.');
-      else throw new Error('fail');
-    } catch {
-      showToast('⚠️ 복사 실패 — 직접 복사해주세요', prompt, true);
-    }
+    });
   }
 
-  // ── 기관 필터 ──
+  // ── 토스트 ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    void t.offsetWidth;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── 필터 + 검색 ──
   let activeFilter = 'all';
+  let searchQuery = '';
 
   function handleFilter(btn) {
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -992,68 +1239,76 @@
     applyAll();
   }
 
-  // ── 검색 ──
-  let searchQuery = '';
-
   function handleSearch() {
     searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
     applyAll();
   }
 
-  function highlight(text, query) {
-    if (!query) return text;
-    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+  function highlight(text, q) {
+    if (!q) return text;
+    return text.replace(new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi'), '<mark>$1</mark>');
   }
 
   function applyAll() {
     const cards = document.querySelectorAll('.card[data-agency]');
+    const bm = getBookmarks();
     let anyVisible = false;
 
     cards.forEach(card => {
-      const agencyMatch = activeFilter === 'all' || activeFilter === card.dataset.agency;
+      const agency = card.dataset.agency;
+      const agencyMatch = activeFilter === 'all' || activeFilter === agency;
 
-      if (!agencyMatch) {
-        card.classList.add('card-hidden');
+      // 북마크 필터: 카드 내 북마크 아이템이 없으면 숨김
+      if (activeFilter === 'bookmark') {
+        const hasBm = [...card.querySelectorAll('.announcement-link')].some(l => bm.includes(l.href));
+        if (!hasBm) { card.classList.add('card-hidden'); return; }
+        card.classList.remove('card-hidden');
+        card.querySelectorAll('.announcement-item').forEach(item => {
+          const link = item.querySelector('.announcement-link');
+          const inBm = link && bm.includes(link.href);
+          item.classList.toggle('item-hidden', !inBm);
+        });
+        anyVisible = true;
         return;
       }
 
+      if (!agencyMatch) { card.classList.add('card-hidden'); return; }
       card.classList.remove('card-hidden');
 
       const items = card.querySelectorAll('.announcement-item');
-      let cardHasMatch = false;
-
+      let cardHit = false;
       items.forEach(item => {
         const titleEl = item.querySelector('.announcement-title');
-        // 원본 텍스트 보존
-        if (!titleEl.dataset.original) {
-          titleEl.dataset.original = titleEl.textContent;
-        }
-        const original = titleEl.dataset.original;
-
+        if (!titleEl) return;
+        if (!titleEl.dataset.original) titleEl.dataset.original = titleEl.textContent;
+        const orig = titleEl.dataset.original;
         if (!searchQuery) {
-          titleEl.innerHTML = original;
+          titleEl.innerHTML = orig;
           item.classList.remove('item-hidden');
-          cardHasMatch = true;
-        } else if (original.toLowerCase().includes(searchQuery)) {
-          titleEl.innerHTML = highlight(original, searchQuery);
+          cardHit = true;
+        } else if (orig.toLowerCase().includes(searchQuery)) {
+          titleEl.innerHTML = highlight(orig, searchQuery);
           item.classList.remove('item-hidden');
-          cardHasMatch = true;
+          cardHit = true;
         } else {
-          titleEl.innerHTML = original;
+          titleEl.innerHTML = orig;
           item.classList.add('item-hidden');
         }
       });
 
-      if (searchQuery && !cardHasMatch) {
-        card.classList.add('card-hidden');
-      } else {
-        anyVisible = true;
-      }
+      if (searchQuery && !cardHit) card.classList.add('card-hidden');
+      else anyVisible = true;
     });
 
     document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+    buildUrgentPanel();
   }
+
+  // ── 초기화 ──
+  recalcDdays();
+  loadBookmarks();
+  buildUrgentPanel();
+  setInterval(recalcDdays, 60000); // 1분마다 D-day 갱신
 </script>
 
 </body>
