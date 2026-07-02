@@ -82,11 +82,16 @@ def scrape_nipa():
     base = 'https://www.nipa.kr/home/bsnsAll/0/'
     try:
         r = requests.get(url, headers=HEADERS, timeout=20)
-        r.encoding = 'utf-8'
+        r.encoding = r.apparent_encoding or 'utf-8'
+        print(f'NIPA HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
         soup = BeautifulSoup(r.text, 'lxml')
 
+        # 링크 패턴: nttDetail 또는 nttNo
+        all_links = soup.find_all('a', href=re.compile(r'nttDetail|nttNo='))
+        print(f'NIPA 링크 후보: {len(all_links)}개')
+
         items, seen = [], set()
-        for a in soup.find_all('a', href=re.compile(r'nttNo=\d+')):
+        for a in all_links:
             title = a.get_text(strip=True)
             href = a.get('href', '')
             if not title or len(title) < 5 or href in seen:
@@ -121,14 +126,16 @@ def scrape_khidi():
     base = 'https://www.khidi.or.kr'
     try:
         r = requests.get(url, headers=HEADERS, timeout=20)
-        r.encoding = 'utf-8'
+        r.encoding = r.apparent_encoding or 'utf-8'
+        print(f'KHIDI HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
         soup = BeautifulSoup(r.text, 'lxml')
 
+        # 링크 패턴: board/view 또는 linkId
+        all_links = soup.find_all('a', href=re.compile(r'board/view|linkId='))
+        print(f'KHIDI 링크 후보: {len(all_links)}개')
+
         items, seen = [], set()
-        for row in soup.select('table tr'):
-            a = row.find('a', href=re.compile(r'(linkId|no1)=\d+'))
-            if not a:
-                continue
+        for a in all_links:
             title = a.get_text(strip=True)
             href = a.get('href', '')
             if not title or len(title) < 5 or href in seen:
@@ -138,10 +145,10 @@ def scrape_khidi():
             if not href.startswith('http'):
                 href = base + href
 
-            row_text = row.get_text()
+            row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
+            row_text = row.get_text() if row else ''
             deadline = find_last_date(row_text)
 
-            # 마감일이 이미 지난 항목 제외
             if deadline:
                 try:
                     dl = datetime.strptime(deadline, '%Y-%m-%d').date()
@@ -223,14 +230,15 @@ def scrape_dgtp():
     base = 'https://dgtp.or.kr'
     try:
         r = requests.get(url, headers=HEADERS, timeout=20, verify=False)
-        r.encoding = 'utf-8'
+        r.encoding = r.apparent_encoding or 'utf-8'
+        print(f'DGTP HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
         soup = BeautifulSoup(r.text, 'lxml')
 
+        all_links = soup.find_all('a', href=re.compile(r'nttId=\d+|BoardControll'))
+        print(f'DGTP 링크 후보: {len(all_links)}개')
+
         items, seen = [], set()
-        for row in soup.select('table tr'):
-            a = row.find('a', href=re.compile(r'nttId=\d+'))
-            if not a:
-                continue
+        for a in all_links:
             title = a.get_text(strip=True)
             href = a.get('href', '')
             if not title or len(title) < 5 or href in seen:
@@ -240,7 +248,8 @@ def scrape_dgtp():
             if not href.startswith('http'):
                 href = base + href
 
-            row_text = row.get_text()
+            row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
+            row_text = row.get_text() if row else ''
             deadline = find_last_date(row_text)
 
             meta = f'<span>마감 {deadline}</span>' if deadline else ''
