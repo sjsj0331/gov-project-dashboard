@@ -65,14 +65,30 @@ def make_li(title, href, deadline_str='', meta=''):
     )
 
 
-def find_last_date(text):
-    """텍스트에서 마지막 날짜(마감일)를 추출 — YYYY-MM-DD 형식으로 반환."""
+def find_deadline_date(text):
+    """텍스트에서 마감일을 추출. YYYY-MM-DD 형식의 날짜 중 가장 나중 날짜를 반환."""
+    # 1) YYYY-MM-DD 형식 모두 찾아서 최댓값 반환
     matches = re.findall(r'(20\d{2})[.\-/](\d{1,2})[.\-/](\d{1,2})', text)
-    for y, mo, d in reversed(matches):
+    candidates = []
+    for y, mo, d in matches:
         try:
-            return date(int(y), int(mo), int(d)).strftime('%Y-%m-%d')
+            candidates.append(date(int(y), int(mo), int(d)))
         except ValueError:
-            continue
+            pass
+    if candidates:
+        return max(candidates).strftime('%Y-%m-%d')
+
+    # 2) "~N.N" 또는 "(~N/N)" 형식 마감일 (예: KHIDI 제목의 "~7.6(월)")
+    m = re.search(r'[~～]\s*(\d{1,2})[./](\d{1,2})', text)
+    if m:
+        mo, d = int(m.group(1)), int(m.group(2))
+        try:
+            dt = date(TODAY.year, mo, d)
+            if dt < TODAY:
+                dt = date(TODAY.year + 1, mo, d)
+            return dt.strftime('%Y-%m-%d')
+        except ValueError:
+            pass
     return ''
 
 
@@ -104,7 +120,7 @@ def scrape_nipa():
                 href = base + href.lstrip('/')
 
             row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
-            deadline = find_last_date(row.get_text()) if row else ''
+            deadline = find_deadline_date(row.get_text()) if row else ''
 
             meta = f'<span>마감 {deadline}</span>' if deadline else ''
             li = make_li(title, href, deadline, meta)
@@ -147,7 +163,7 @@ def scrape_khidi():
 
             row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
             row_text = row.get_text() if row else ''
-            deadline = find_last_date(row_text)
+            deadline = find_deadline_date(row_text)
 
             if deadline:
                 try:
@@ -208,7 +224,7 @@ def scrape_gjtp():
 
             # 기간 셀에서 마감일 추출 (예: "2026-06-01 ~ 2026-07-16")
             row_text = row.get_text()
-            deadline = find_last_date(row_text)
+            deadline = find_deadline_date(row_text)
 
             meta = f'<span>마감 {deadline}</span>' if deadline else ''
             li = make_li(title, href, deadline, meta)
@@ -250,7 +266,7 @@ def scrape_dgtp():
 
             row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
             row_text = row.get_text() if row else ''
-            deadline = find_last_date(row_text)
+            deadline = find_deadline_date(row_text)
 
             meta = f'<span>마감 {deadline}</span>' if deadline else ''
             li = make_li(title, href, deadline, meta)
