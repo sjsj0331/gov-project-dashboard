@@ -244,51 +244,10 @@ def scrape_gjtp():
 
 # ── DGTP ──────────────────────────────────────────────────────────────────────
 def scrape_dgtp():
-    url = 'https://dgtp.or.kr/bbs/BoardControll.do?bbsId=BBSMSTR_000000000003'
-    base = 'https://dgtp.or.kr'
-    try:
-        r = requests.get(url, headers=HEADERS, timeout=20, verify=False)
-        r.encoding = r.apparent_encoding or 'utf-8'
-        print(f'DGTP HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
-        soup = BeautifulSoup(r.text, 'lxml')
-
-        # 링크 패턴 탐색용 디버그 출력
-        sample = [(a.get('href','')[:80], a.get_text(strip=True)[:30])
-                  for a in soup.find_all('a', href=True)
-                  if 'bbs' in a.get('href','').lower() or 'ntt' in a.get('href','').lower()]
-        for href, txt in sample[:8]:
-            print(f'  DGTP link: {href!r} → {txt!r}')
-        # nttId= 가 있는 링크만 실제 공고 (BoardControll만 있는 건 네비게이션)
-        all_links = soup.find_all('a', href=re.compile(r'nttId=\d+'))
-        print(f'DGTP nttId 링크: {len(all_links)}개')
-
-        items, seen = [], set()
-        for a in all_links:
-            title = a.get_text(strip=True)
-            href = a.get('href', '')
-            if not title or len(title) < 5 or href in seen:
-                continue
-            seen.add(href)
-
-            if not href.startswith('http'):
-                href = base + href
-
-            row = a.find_parent('tr') or a.find_parent('li') or a.find_parent()
-            row_text = row.get_text() if row else ''
-            deadline = find_deadline_date(row_text)
-
-            meta = f'<span>마감 {deadline}</span>' if deadline else ''
-            li = make_li(title, href, deadline, meta)
-            if li:
-                items.append(li)
-                if len(items) >= 5:
-                    break
-
-        print(f'DGTP: {len(items)}건')
-        return items
-    except Exception as e:
-        print(f'DGTP 오류: {e}')
-        return []
+    # dgtp.or.kr 는 해외 IP 차단으로 GitHub Actions에서 접근 불가.
+    # 기존 데이터를 유지하고 수동 업데이트.
+    print('DGTP: 해외 IP 차단 사이트 — 기존 데이터 유지')
+    return []
 
 
 # ── HTML 업데이트 ──────────────────────────────────────────────────────────────
