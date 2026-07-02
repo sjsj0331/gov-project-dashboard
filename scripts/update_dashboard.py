@@ -252,9 +252,15 @@ def scrape_dgtp():
         print(f'DGTP HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
         soup = BeautifulSoup(r.text, 'lxml')
 
+        # 링크 패턴 탐색용 디버그 출력
+        sample = [(a.get('href','')[:80], a.get_text(strip=True)[:30])
+                  for a in soup.find_all('a', href=True)
+                  if 'bbs' in a.get('href','').lower() or 'ntt' in a.get('href','').lower()]
+        for href, txt in sample[:8]:
+            print(f'  DGTP link: {href!r} → {txt!r}')
         # nttId= 가 있는 링크만 실제 공고 (BoardControll만 있는 건 네비게이션)
         all_links = soup.find_all('a', href=re.compile(r'nttId=\d+'))
-        print(f'DGTP 링크 후보: {len(all_links)}개')
+        print(f'DGTP nttId 링크: {len(all_links)}개')
 
         items, seen = [], set()
         for a in all_links:
