@@ -252,7 +252,8 @@ def scrape_dgtp():
         print(f'DGTP HTTP {r.status_code}, 인코딩: {r.encoding}, 크기: {len(r.text)}자')
         soup = BeautifulSoup(r.text, 'lxml')
 
-        all_links = soup.find_all('a', href=re.compile(r'nttId=\d+|BoardControll'))
+        # nttId= 가 있는 링크만 실제 공고 (BoardControll만 있는 건 네비게이션)
+        all_links = soup.find_all('a', href=re.compile(r'nttId=\d+'))
         print(f'DGTP 링크 후보: {len(all_links)}개')
 
         items, seen = [], set()
