@@ -67,12 +67,14 @@ def make_li(title, href, deadline_str='', meta=''):
 
 def find_deadline_date(text):
     """텍스트에서 마감일을 추출. YYYY-MM-DD 형식의 날짜 중 가장 나중 날짜를 반환."""
-    # 1) YYYY-MM-DD 형식 모두 찾아서 최댓값 반환
+    # 1) YYYY-MM-DD 형식 중 오늘 이후 날짜만 후보로 — 최댓값을 마감일로 반환
     matches = re.findall(r'(20\d{2})[.\-/](\d{1,2})[.\-/](\d{1,2})', text)
     candidates = []
     for y, mo, d in matches:
         try:
-            candidates.append(date(int(y), int(mo), int(d)))
+            dt = date(int(y), int(mo), int(d))
+            if dt >= TODAY:  # 이미 지난 날짜는 등록일일 가능성이 높으므로 제외
+                candidates.append(dt)
         except ValueError:
             pass
     if candidates:
