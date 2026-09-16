@@ -1,0 +1,2308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>정부과제 공고 대시보드 | 뉴로핏</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<!-- Pretendard 폰트는 사용 가능한 경우 시스템 폰트로 사용, 없으면 폴백 -->
+<script>
+  // FOUC 방지: CSS 로드 전에 테마 결정
+  (function() {
+    try {
+      var saved = localStorage.getItem('theme');
+      var theme = (saved === 'dark' || saved === 'light')
+        ? saved
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (e) {}
+  })();
+</script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f6f7fb;
+    --bg-grad-1: #eef2ff;
+    --bg-grad-2: #fdf4ff;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --border-light: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --accent: #4f46e5;
+    --accent-hover: #4338ca;
+    --accent-light: #eef2ff;
+    --tag-bg: #f1f5f9;
+    --urgent: #e11d48;
+    --urgent-bg: #ffe4e6;
+    --warning: #d97706;
+    --warning-bg: #fef3c7;
+    --safe: #059669;
+    --safe-bg: #d1fae5;
+    --neutral: #64748b;
+    --neutral-bg: #e2e8f0;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow: 0 2px 4px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.03);
+    --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 10px 30px rgba(79, 70, 229, 0.08), 0 4px 12px rgba(15, 23, 42, 0.06);
+  }
+
+  html { color-scheme: light; }
+
+  /* 다크모드 색상 팔레트 */
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #0b1220;
+    --bg-grad-1: #1e1b4b;
+    --bg-grad-2: #3b1e5b;
+    --card-bg: #131a2b;
+    --border: #263048;
+    --border-light: #1c243a;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+    --accent: #818cf8;
+    --accent-hover: #a5b4fc;
+    --accent-light: rgba(129, 140, 248, 0.15);
+    --tag-bg: #263048;
+    --urgent: #fb7185;
+    --urgent-bg: rgba(251, 113, 133, 0.15);
+    --warning: #fbbf24;
+    --warning-bg: rgba(251, 191, 36, 0.15);
+    --safe: #34d399;
+    --safe-bg: rgba(52, 211, 153, 0.15);
+    --neutral: #94a3b8;
+    --neutral-bg: rgba(148, 163, 184, 0.15);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 30px rgba(129, 140, 248, 0.15), 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 0% 0%, var(--bg-grad-1) 0%, transparent 50%),
+      radial-gradient(at 100% 0%, var(--bg-grad-2) 0%, transparent 45%);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 48px 24px 40px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  /* 다크모드 카드/전환 부드럽게 */
+  .card, .refresh-btn, .theme-toggle, .quick-link, .dday, .card-tag {
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  }
+
+  /* 다크모드용 제목 그라디언트 */
+  html[data-theme="dark"] .title {
+    background: linear-gradient(135deg, #e0e7ff 0%, #a5b4fc 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .container { max-width: 1600px; margin: 0 auto; }
+
+  /* ═══ 상단 요약 바 ═══ */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .summary-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .summary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+  .summary-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px; height: 100%;
+    background: var(--neutral);
+    opacity: 0.6;
+  }
+  .summary-item[data-kind="today"]::before { background: var(--urgent); }
+  .summary-item[data-kind="urgent"]::before { background: var(--warning); }
+  .summary-item[data-kind="neuro"]::before { background: linear-gradient(180deg, #10b981, #eab308); opacity: 1; }
+  .summary-item[data-kind="total"]::before { background: var(--accent); }
+
+  .summary-item.highlight {
+    border-color: rgba(16, 185, 129, 0.35);
+    background: linear-gradient(135deg, var(--card-bg), rgba(16, 185, 129, 0.06));
+  }
+
+  .summary-icon {
+    font-size: 26px;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .summary-body { flex: 1; min-width: 0; }
+  .summary-value {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 4px;
+    letter-spacing: -0.03em;
+  }
+  .summary-item[data-kind="today"] .summary-value { color: var(--urgent); }
+  .summary-item[data-kind="urgent"] .summary-value { color: var(--warning); }
+  .summary-item[data-kind="neuro"] .summary-value {
+    background: linear-gradient(135deg, #10b981, #eab308);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .summary-item[data-kind="total"] .summary-value { color: var(--accent); }
+
+  .summary-label {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* 요약 항목 값이 0이면 흐리게 */
+  .summary-item.zero { opacity: 0.55; }
+
+  /* ═══ 요약 바 박스 클릭 시 공고 강조 ═══ */
+  .summary-item {
+    cursor: pointer;
+    user-select: none;
+  }
+  .summary-item.active {
+    border-width: 2px;
+    padding: 15px 17px;  /* border 증가 보정 */
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+  .summary-item[data-kind="today"].active { border-color: var(--urgent); background: linear-gradient(135deg, var(--card-bg), rgba(225, 29, 72, 0.06)); }
+  .summary-item[data-kind="urgent"].active { border-color: var(--warning); background: linear-gradient(135deg, var(--card-bg), rgba(217, 119, 6, 0.06)); }
+  .summary-item[data-kind="neuro"].active { border-color: #10b981; background: linear-gradient(135deg, var(--card-bg), rgba(16, 185, 129, 0.10)); }
+  .summary-item[data-kind="total"].active { border-color: var(--accent); background: linear-gradient(135deg, var(--card-bg), var(--accent-light)); }
+
+  /* 공고 하이라이트 스타일 (박스 클릭 시에만 적용) */
+  .announcement-item.hl-today,
+  .announcement-item.hl-urgent,
+  .announcement-item.hl-neuro {
+    border-radius: 8px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-left: -10px;
+    margin-right: -10px;
+    position: relative;
+    border-left: 3px solid transparent;
+  }
+  .announcement-item.hl-today {
+    background: linear-gradient(135deg, rgba(225, 29, 72, 0.08) 0%, rgba(225, 29, 72, 0.03) 100%);
+    border-left-color: var(--urgent);
+  }
+  .announcement-item.hl-urgent {
+    background: linear-gradient(135deg, rgba(217, 119, 6, 0.08) 0%, rgba(217, 119, 6, 0.03) 100%);
+    border-left-color: var(--warning);
+  }
+  .announcement-item.hl-neuro {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(234, 179, 8, 0.05) 100%);
+    border-image: linear-gradient(180deg, #10b981, #eab308) 1;
+  }
+  .announcement-item.hl-neuro::after {
+    content: '💰';
+    position: absolute;
+    top: 10px;
+    right: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  .announcement-item.hl-today .announcement-title,
+  .announcement-item.hl-urgent .announcement-title,
+  .announcement-item.hl-neuro .announcement-title {
+    font-weight: 700;
+  }
+
+  /* 다크모드용 하이라이트 배경 강화 */
+  html[data-theme="dark"] .announcement-item.hl-today {
+    background: linear-gradient(135deg, rgba(251, 113, 133, 0.18) 0%, rgba(251, 113, 133, 0.08) 100%);
+  }
+  html[data-theme="dark"] .announcement-item.hl-urgent {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(251, 191, 36, 0.08) 100%);
+  }
+  html[data-theme="dark"] .announcement-item.hl-neuro {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.20) 0%, rgba(234, 179, 8, 0.10) 100%);
+  }
+
+  /* 비활성 카드 살짝 흐리게 (선택 강조 효과) */
+  .dashboard-container.has-active .announcement-item:not(.hl-today):not(.hl-urgent):not(.hl-neuro) {
+    opacity: 0.45;
+    transition: opacity 0.25s ease;
+  }
+  .announcement-item {
+    transition: opacity 0.25s ease, background 0.25s ease, padding 0.25s ease, margin 0.25s ease;
+    position: relative;
+  }
+
+  /* 상태 배지가 붙은 항목 레이아웃 */
+  .announcement-item.has-badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .announcement-item.has-badge > .announcement-link {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ═══ 공고별 진행 상태 배지 ═══ */
+  .status-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    min-width: 48px;
+    height: 26px;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    border: 1.5px dashed var(--border);
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+    letter-spacing: -0.01em;
+    margin-top: 2px;
+    align-self: flex-start;
+    white-space: nowrap;
+  }
+  .status-badge:hover {
+    transform: scale(1.06);
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+    box-shadow: 0 2px 6px rgba(79, 70, 229, 0.15);
+  }
+  .status-badge[data-status="none"] {
+    opacity: 0.85;
+    border-style: dashed;
+  }
+  .status-badge[data-status="none"]:hover { opacity: 1; }
+
+  .status-badge[data-status="interest"],
+  .status-badge[data-status="review"],
+  .status-badge[data-status="planning"],
+  .status-badge[data-status="done"],
+  .status-badge[data-status="skip"] {
+    border-style: solid;
+  }
+  .status-badge[data-status="interest"] {
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.45);
+    opacity: 1;
+  }
+  .status-badge[data-status="review"] {
+    background: rgba(234, 179, 8, 0.15);
+    color: #b45309;
+    border-color: rgba(234, 179, 8, 0.5);
+    opacity: 1;
+  }
+  .status-badge[data-status="planning"] {
+    background: rgba(217, 119, 6, 0.15);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.5);
+    opacity: 1;
+  }
+  .status-badge[data-status="done"] {
+    background: rgba(16, 185, 129, 0.15);
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.5);
+    opacity: 1;
+  }
+  .status-badge[data-status="skip"] {
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--text-muted);
+    border-color: rgba(148, 163, 184, 0.4);
+    opacity: 0.7;
+  }
+
+  /* 다크모드 상태 배지 색상 조정 */
+  html[data-theme="dark"] .status-badge[data-status="interest"] { color: #60a5fa; background: rgba(59, 130, 246, 0.2); }
+  html[data-theme="dark"] .status-badge[data-status="review"] { color: #fcd34d; background: rgba(234, 179, 8, 0.2); }
+  html[data-theme="dark"] .status-badge[data-status="planning"] { color: #fbbf24; background: rgba(217, 119, 6, 0.2); }
+  html[data-theme="dark"] .status-badge[data-status="done"] { color: #34d399; background: rgba(16, 185, 129, 0.2); }
+
+  /* 신청완료 처리된 공고는 살짝 흐리게 */
+  .announcement-item.status-done .announcement-title {
+    text-decoration: line-through;
+    text-decoration-color: rgba(16, 185, 129, 0.4);
+    color: var(--text-secondary);
+  }
+
+  /* 미해당(skip) 처리 시 상당히 흐리게 */
+  .announcement-item.status-skip {
+    opacity: 0.55;
+  }
+
+  /* 상태 카운트 배지 (카드 헤더에 표시) */
+  .status-count {
+    display: none;  /* 값이 있을 때만 JS로 표시 */
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.15);
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    margin-left: 6px;
+  }
+  html[data-theme="dark"] .status-count { color: #34d399; background: rgba(16, 185, 129, 0.2); }
+  .status-count.has-value { display: inline-flex; }
+
+  /* ═══ AI 요약 버튼 & 모달 ═══ */
+  .summary-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: var(--tag-bg);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    margin-top: 2px;
+    align-self: flex-start;
+  }
+  .summary-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: scale(1.08);
+  }
+  .summary-btn.has-summary {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.15), rgba(236, 72, 153, 0.15));
+    color: var(--accent);
+    border-color: rgba(129, 140, 248, 0.4);
+  }
+
+  .summary-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(6px);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: modalFadeIn 0.2s ease;
+  }
+  .summary-modal.show { display: flex; }
+  @keyframes modalFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes modalSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .summary-modal-content {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 28px;
+    max-width: 680px;
+    width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: modalSlideUp 0.25s ease;
+    border: 1px solid var(--border);
+  }
+  .summary-modal-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+  .summary-modal-header .icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+  .summary-modal-header .title-wrap {
+    flex: 1;
+    min-width: 0;
+  }
+  .summary-modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+  .summary-modal-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .summary-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }
+  .summary-close-btn:hover {
+    background: var(--urgent-bg);
+    color: var(--urgent);
+  }
+
+  .summary-section {
+    margin-bottom: 18px;
+  }
+  .summary-section:last-child { margin-bottom: 0; }
+  .summary-section h4 {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .summary-section p, .summary-section li {
+    font-size: 13.5px;
+    line-height: 1.65;
+    color: var(--text-primary);
+  }
+  .summary-section ul { padding-left: 18px; }
+  .summary-section li { margin-bottom: 4px; }
+
+  .summary-neuro-view {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.06), rgba(129, 140, 248, 0.04));
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .summary-neuro-view h4 {
+    color: #047857;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  html[data-theme="dark"] .summary-neuro-view h4 { color: #34d399; }
+  html[data-theme="dark"] .summary-neuro-view {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(129, 140, 248, 0.08));
+  }
+
+  .summary-action-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 999px;
+    margin-top: 8px;
+  }
+  .summary-action-tag[data-action="strong"] {
+    background: rgba(225, 29, 72, 0.15);
+    color: #be123c;
+    border: 1px solid rgba(225, 29, 72, 0.35);
+  }
+  .summary-action-tag[data-action="recommend"] {
+    background: rgba(217, 119, 6, 0.15);
+    color: #b45309;
+    border: 1px solid rgba(217, 119, 6, 0.35);
+  }
+  .summary-action-tag[data-action="review"] {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+    border: 1px solid rgba(59, 130, 246, 0.35);
+  }
+  .summary-action-tag[data-action="skip"] {
+    background: rgba(148, 163, 184, 0.15);
+    color: var(--text-muted);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+  }
+  html[data-theme="dark"] .summary-action-tag[data-action="strong"] { color: #fda4af; background: rgba(225, 29, 72, 0.25); }
+  html[data-theme="dark"] .summary-action-tag[data-action="recommend"] { color: #fbbf24; background: rgba(217, 119, 6, 0.25); }
+  html[data-theme="dark"] .summary-action-tag[data-action="review"] { color: #93c5fd; background: rgba(59, 130, 246, 0.25); }
+
+  .summary-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: 16px;
+    transition: all 0.15s ease;
+  }
+  .summary-link-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+
+  /* ═══ 뉴로핏 우선순위 태그 ═══ */
+  .priority-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 1px 7px;
+    font-size: 9.5px;
+    font-weight: 800;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+    margin-right: 6px;
+    border: 1px solid transparent;
+    flex-shrink: 0;
+  }
+  /* R급: 매출 인식 사업 — 최상위 (금색·초록 그라디언트) */
+  .priority-tag[data-level="R"] {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(234, 179, 8, 0.22));
+    color: #047857;
+    border-color: rgba(16, 185, 129, 0.55);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.10), 0 1px 3px rgba(16, 185, 129, 0.2);
+    font-weight: 900;
+  }
+  .priority-tag[data-level="S"] {
+    background: rgba(225, 29, 72, 0.15);
+    color: #be123c;
+    border-color: rgba(225, 29, 72, 0.4);
+    box-shadow: 0 0 0 2px rgba(225, 29, 72, 0.08);
+  }
+  .priority-tag[data-level="A"] {
+    background: rgba(217, 119, 6, 0.15);
+    color: #b45309;
+    border-color: rgba(217, 119, 6, 0.4);
+  }
+  .priority-tag[data-level="B"] {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563eb;
+    border-color: rgba(59, 130, 246, 0.35);
+  }
+  .priority-tag[data-level="C"] {
+    background: rgba(148, 163, 184, 0.12);
+    color: var(--text-muted);
+    border-color: rgba(148, 163, 184, 0.3);
+  }
+
+  /* 다크모드용 우선순위 태그 */
+  html[data-theme="dark"] .priority-tag[data-level="R"] {
+    color: #6ee7b7;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(234, 179, 8, 0.25));
+    border-color: rgba(52, 211, 153, 0.6);
+  }
+  html[data-theme="dark"] .priority-tag[data-level="S"] { color: #fda4af; background: rgba(225, 29, 72, 0.25); }
+  html[data-theme="dark"] .priority-tag[data-level="A"] { color: #fbbf24; background: rgba(217, 119, 6, 0.25); }
+  html[data-theme="dark"] .priority-tag[data-level="B"] { color: #93c5fd; background: rgba(59, 130, 246, 0.25); }
+
+  /* R급 공고 최상위 강조: 초록·금색 그라디언트 좌측 라인 + 반짝임 */
+  .announcement-item[data-priority="R"] {
+    border-left: 4px solid transparent;
+    border-image: linear-gradient(180deg, #10b981, #eab308) 1;
+    padding-left: 11px;
+    margin-left: -11px;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), rgba(234, 179, 8, 0.03) 40%, transparent 70%);
+    position: relative;
+  }
+  .announcement-item[data-priority="R"] .announcement-title {
+    font-weight: 800;
+    color: var(--text-primary);
+  }
+  html[data-theme="dark"] .announcement-item[data-priority="R"] {
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.18), rgba(234, 179, 8, 0.06) 40%, transparent 70%);
+  }
+
+  /* S급 공고 전체 강조: 좌측 붉은 라인 */
+  .announcement-item[data-priority="S"] {
+    border-left: 3px solid var(--urgent);
+    padding-left: 10px;
+    margin-left: -10px;
+    background: linear-gradient(90deg, rgba(225, 29, 72, 0.04), transparent 60%);
+  }
+  .announcement-item[data-priority="S"] .announcement-title {
+    font-weight: 700;
+  }
+  html[data-theme="dark"] .announcement-item[data-priority="S"] {
+    background: linear-gradient(90deg, rgba(225, 29, 72, 0.12), transparent 60%);
+  }
+
+  /* 우선순위 범례 (상단 요약 바 아래) */
+  .priority-legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 10px 14px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+  .priority-legend .legend-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-right: 4px;
+  }
+  .priority-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  header {
+    margin-bottom: 20px;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+
+  .refresh-btn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    font-family: inherit;
+    letter-spacing: -0.01em;
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.2);
+  }
+
+  .refresh-btn:hover {
+    background: var(--accent-hover);
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3), 0 4px 16px rgba(79, 70, 229, 0.25);
+    transform: translateY(-1px);
+  }
+
+  .refresh-btn:active { transform: scale(0.97); }
+
+  .refresh-btn .refresh-icon { display: inline-block; transition: transform 0.3s ease; }
+
+  .refresh-btn.spinning .refresh-icon { animation: spin 0.6s ease-in-out; }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* 다크모드 토글 버튼 */
+  .header-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: var(--shadow-sm);
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
+
+  .theme-toggle:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+
+  .theme-toggle:active { transform: scale(0.95); }
+
+  .theme-toggle .icon-sun { display: none; }
+  .theme-toggle .icon-moon { display: inline; }
+  html[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+  html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+  .toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #111827;
+    color: #fff;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 360px;
+    line-height: 1.5;
+  }
+
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error { background: var(--urgent); }
+  .toast-detail { font-size: 11.5px; color: rgba(255,255,255,0.75); margin-top: 4px; }
+
+  .title {
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -0.03em;
+    background: linear-gradient(135deg, #0f172a 0%, #4f46e5 80%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .subtitle { font-size: 14px; color: var(--text-secondary); font-weight: 500; }
+
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 14px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+  }
+
+  .meta-divider { color: var(--border); }
+
+  /* ── 툴바 (검색 + 필터) ── */
+  .toolbar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+    max-width: 340px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 9px 12px 9px 34px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 13px;
+    font-family: inherit;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .search-input::placeholder { color: var(--text-muted); }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+  }
+
+  .filter-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .filter-btn {
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--card-bg);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: var(--shadow-sm);
+    letter-spacing: -0.01em;
+  }
+
+  .filter-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: #e0e7ff;
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 1px 2px rgba(79, 70, 229, 0.25), 0 2px 8px rgba(79, 70, 229, 0.2);
+  }
+
+  /* 검색 결과 없음 */
+  .no-results {
+    display: none;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+    font-size: 14px;
+    grid-column: 1 / -1;
+  }
+
+  .no-results-icon { font-size: 36px; margin-bottom: 12px; }
+
+  mark {
+    background: #fef08a;
+    color: var(--text-primary);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .card-hidden { display: none !important; }
+  .announcement-item.item-hidden { display: none; }
+
+  /* ── 그리드 ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 18px;
+  }
+
+  .card {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.2s ease;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent) 0%, #818cf8 50%, #c4b5fd 100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); border-color: #cbd5e1; }
+  .card:hover::before { opacity: 1; }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  .card-title-wrap { flex: 1; min-width: 0; }
+
+  .card-title { font-size: 17px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; letter-spacing: -0.02em; }
+
+  .card-subtitle { font-size: 11.5px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500; }
+
+  .card-tag {
+    display: inline-block;
+    padding: 4px 11px;
+    background: linear-gradient(135deg, var(--accent-light) 0%, #f5f3ff 100%);
+    color: var(--accent);
+    font-size: 10.5px;
+    font-weight: 700;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    border: 1px solid #e0e7ff;
+  }
+
+  .section-label { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+  .section-label h3 { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+  .view-all { font-size: 11.5px; color: var(--accent); text-decoration: none; font-weight: 600; transition: color 0.15s ease; }
+  .view-all:hover { color: var(--accent-hover); text-decoration: underline; }
+
+  .announcement-list { list-style: none; margin-bottom: 14px; }
+
+  .announcement-item { padding: 10px 0; border-bottom: 1px solid var(--border-light); }
+  .announcement-item:last-child { border-bottom: none; }
+
+  .announcement-link { display: flex; gap: 10px; text-decoration: none; color: inherit; align-items: flex-start; }
+  .announcement-link:hover .announcement-title { color: var(--accent); }
+
+  .dday {
+    flex-shrink: 0;
+    min-width: 52px;
+    text-align: center;
+    padding: 4px 9px;
+    font-size: 10.5px;
+    font-weight: 700;
+    border-radius: 999px;
+    margin-top: 1px;
+    letter-spacing: -0.01em;
+    border: 1px solid transparent;
+  }
+
+  .dday.urgent { background: var(--urgent-bg); color: var(--urgent); border-color: rgba(225, 29, 72, 0.18); box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.06); }
+  .dday.warning { background: var(--warning-bg); color: var(--warning); border-color: rgba(217, 119, 6, 0.18); }
+  .dday.safe { background: var(--safe-bg); color: var(--safe); border-color: rgba(5, 150, 105, 0.18); }
+  .dday.neutral { background: var(--neutral-bg); color: var(--neutral); border-color: rgba(100, 116, 139, 0.18); }
+
+  .announcement-content { flex: 1; min-width: 0; }
+
+  .announcement-title { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.5; margin-bottom: 4px; transition: color 0.15s ease; letter-spacing: -0.01em; }
+
+  .announcement-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; font-weight: 500; }
+
+  .quick-links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border-light); }
+
+  .quick-link {
+    padding: 5px 11px;
+    background: var(--tag-bg);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 999px;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+    border: 1px solid transparent;
+  }
+
+  .quick-link:hover { background: var(--accent-light); color: var(--accent); border-color: #e0e7ff; transform: translateY(-1px); }
+
+  footer {
+    margin-top: 44px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  .footer-notice {
+    color: var(--warning);
+    background: linear-gradient(135deg, var(--warning-bg) 0%, #fef9c3 100%);
+    padding: 11px 18px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    display: inline-block;
+    font-weight: 500;
+    border: 1px solid rgba(217, 119, 6, 0.15);
+  }
+
+  @media (max-width: 700px) {
+    body { padding: 24px 14px 28px; }
+    .title { font-size: 23px; }
+    .grid { grid-template-columns: 1fr; }
+    .card { padding: 18px; border-radius: 14px; }
+    .dday { min-width: 48px; }
+    .refresh-btn { padding: 8px 14px; font-size: 12px; }
+    .toolbar { gap: 8px; }
+    .search-wrap { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+
+    <header>
+      <div class="header-top">
+        <div>
+          <h1 class="title">정부과제 공고 대시보드</h1>
+          <p class="subtitle">기관별 사업공고를 한눈에 확인하세요</p>
+        </div>
+        <div class="header-actions">
+          <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="다크/라이트 모드 전환" aria-label="테마 전환">
+            <span class="icon-moon">🌙</span>
+            <span class="icon-sun">☀️</span>
+          </button>
+          <button class="refresh-btn" id="refreshBtn" onclick="copyRefreshPrompt()" title="Cowork 채팅용 업데이트 요청 프롬프트를 클립보드에 복사">
+            <span class="refresh-icon">🔄</span>
+            <span>지금 업데이트</span>
+          </button>
+        </div>
+      </div>
+      <div class="meta">
+        <span>뉴로핏 정부과제 PM</span>
+        <span class="meta-divider">·</span>
+        <span id="today"></span>
+        <span class="meta-divider">·</span>
+        <span>데이터 기준: <span id="dataDate">2026-09-16</span></span>
+      </div>
+    </header>
+
+    <!-- 상단 요약 바 -->
+    <div class="summary-bar" id="summaryBar">
+      <div class="summary-item" data-kind="today" title="마감일이 오늘인 공고">
+        <div class="summary-icon">🚨</div>
+        <div class="summary-body">
+          <div class="summary-value" id="statToday">0</div>
+          <div class="summary-label">오늘 마감</div>
+        </div>
+      </div>
+      <div class="summary-item" data-kind="urgent" title="D-3 이하 임박 공고">
+        <div class="summary-icon">⚠️</div>
+        <div class="summary-body">
+          <div class="summary-value" id="statUrgent">0</div>
+          <div class="summary-label">D-3 이하 임박</div>
+        </div>
+      </div>
+      <div class="summary-item highlight" data-kind="neuro" title="매출 인식되는 사업 (R급) — 바우처·시범구매·임차·수출선도형 등. 뉴로핏 최우선">
+        <div class="summary-icon">💰</div>
+        <div class="summary-body">
+          <div class="summary-value" id="statNeuro">0</div>
+          <div class="summary-label">매출 인식 (R급)</div>
+        </div>
+      </div>
+      <div class="summary-item" data-kind="total" title="현재 표시 중인 활성 공고 총 건수">
+        <div class="summary-icon">📋</div>
+        <div class="summary-body">
+          <div class="summary-value" id="statTotal">0</div>
+          <div class="summary-label">전체 활성</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 뉴로핏 우선순위 범례 -->
+    <div class="priority-legend" title="뉴로핏 관점에서 자동 평가한 지원 우선순위 — 매출 인식 사업이 최상위">
+      <span class="legend-title">🎯 뉴로핏 지원 우선순위</span>
+      <span class="legend-item"><span class="priority-tag" data-level="R">💰 매출</span><strong>매출 인식 (최우선)</strong> — 매출인식 사업</span>
+      <span class="legend-item"><span class="priority-tag" data-level="S">S</span>반드시 검토 (의료기기·뇌영상·디지털헬스)</span>
+      <span class="legend-item"><span class="priority-tag" data-level="A">A</span>강력 추천 (바이오헬스·병원·헬스케어)</span>
+      <span class="legend-item"><span class="priority-tag" data-level="B">B</span>검토 가치 (AI·규제·해외진출 <em>지원</em>·수출바우처·시장개척단)</span>
+      <span class="legend-item"><span class="priority-tag" data-level="C">C</span>참고 (컨퍼런스·인재양성)</span>
+    </div>
+
+    <!-- 검색 + 기관 필터 -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input
+          class="search-input"
+          id="searchInput"
+          type="text"
+          placeholder="공고 제목 검색..."
+          oninput="handleSearch()"
+          autocomplete="off"
+        >
+      </div>
+      <div class="filter-wrap">
+        <button class="filter-btn active" data-filter="all" onclick="handleFilter(this)">전체</button>
+        <button class="filter-btn" data-filter="NIPA" onclick="handleFilter(this)">NIPA</button>
+        <button class="filter-btn" data-filter="KHIDI" onclick="handleFilter(this)">KHIDI</button>
+        <button class="filter-btn" data-filter="GJTP" onclick="handleFilter(this)">GJTP</button>
+        <button class="filter-btn" data-filter="DGTP" onclick="handleFilter(this)">DGTP</button>
+        <button class="filter-btn" data-filter="PPI" onclick="handleFilter(this)">PPI</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <main class="grid" id="cardGrid">
+
+      <!-- 정보통신산업진흥원 (NIPA) -->
+      <!-- NIPA -->
+      <section class="card" data-agency="NIPA">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">정보통신산업진흥원</h2>
+            <p class="card-subtitle">NIPA · National IT Industry Promotion Agency</p>
+          </div>
+          <span class="card-tag">NIPA</span>
+        </div>
+
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.nipa.kr/home/bsnsAll/0/nttList?bbsNo=4&tab=2" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16934" target="_blank" rel="noopener">
+              <span class="dday safe">D-26</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 3차 ICT 비즈니스 파트너십(중동) 모집 안내</div>
+                <div class="announcement-meta">
+                  <span>등록 2026-09-15</span>
+                  <span>·</span>
+                  <span>마감 2026-10-12 14:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16931" target="_blank" rel="noopener">
+              <span class="dday safe">D-14</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026 인도 BTS(Bengaluru Tech Summit) 전시회 참가 기업 모집</div>
+                <div class="announcement-meta">
+                  <span>등록 2026-09-11</span>
+                  <span>·</span>
+                  <span>마감 2026-09-30 23:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16921" target="_blank" rel="noopener">
+              <span class="dday warning">D-7</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 아태 AI 특화지구(AHAP) 조성 사업 공고</div>
+                <div class="announcement-meta">
+                  <span>등록 2026-09-03</span>
+                  <span>·</span>
+                  <span>마감 2026-09-23 15:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.nipa.kr/home/2-1" target="_blank" rel="noopener">공지사항</a>
+          <a class="quick-link" href="https://www.nipa.kr/home/2-3" target="_blank" rel="noopener">입찰공고</a>
+          <a class="quick-link" href="https://www.nipa.kr/home/bsnsAll/1" target="_blank" rel="noopener">사업화</a>
+          <a class="quick-link" href="https://www.iris.go.kr/" target="_blank" rel="noopener">IRIS ↗</a>
+        </div>
+      </section>
+
+      <!-- 한국보건산업진흥원 (KHIDI) -->
+      <!-- KHIDI -->
+      <section class="card" data-agency="KHIDI">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">한국보건산업진흥원</h2>
+            <p class="card-subtitle">KHIDI · Korea Health Industry Development Institute</p>
+          </div>
+          <span class="card-tag">KHIDI</span>
+        </div>
+
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.khidi.or.kr/board?menuId=MENU01108" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=979&linkId=48949928&menuId=MENU01108" target="_blank" rel="noopener">
+              <span class="dday urgent">D-2</span>
+              <div class="announcement-content">
+                <div class="announcement-title">「2026 한-카자흐스탄 보건의료 해외진출 홍보 및 공공조달 협력 세미나」 참가기관 모집 공고</div>
+                <div class="announcement-meta">
+                  <span>No. 979</span>
+                  <span>·</span>
+                  <span>등록 2026-09-11</span>
+                  <span>·</span>
+                  <span>마감 2026-09-18 18:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=978&linkId=48949906&menuId=MENU01108" target="_blank" rel="noopener">
+              <span class="dday safe">D-12</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 글로벌 규제 대응 비용 지원(의료기기) 사업 수행기업 모집 3차 공고</div>
+                <div class="announcement-meta">
+                  <span>No. 978</span>
+                  <span>·</span>
+                  <span>등록 2026-09-11</span>
+                  <span>·</span>
+                  <span>마감 2026-09-28 18:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=975&linkId=48949614&menuId=MENU01108" target="_blank" rel="noopener">
+              <span class="dday safe">D-14</span>
+              <div class="announcement-content">
+                <div class="announcement-title">[공고] 「HLTH USA 2026」 디지털헬스케어 한국관 참가기관 모집 공고</div>
+                <div class="announcement-meta">
+                  <span>No. 975</span>
+                  <span>·</span>
+                  <span>등록 2026-09-08</span>
+                  <span>·</span>
+                  <span>마감 2026-09-30 15:00</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.khidi.or.kr/kps" target="_blank" rel="noopener">보건산업종합</a>
+          <a class="quick-link" href="https://www.khidi.or.kr/mdtis" target="_blank" rel="noopener">의료기기 종합정보</a>
+          <a class="quick-link" href="https://www.khidi.or.kr/kbic/" target="_blank" rel="noopener">혁신창업센터</a>
+          <a class="quick-link" href="https://www.khidi.or.kr/mps" target="_blank" rel="noopener">KHIDI 포털</a>
+        </div>
+      </section>
+
+      <!-- 광주테크노파크 (GJTP) -->
+      <!-- GJTP -->
+      <section class="card" data-agency="GJTP">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">광주테크노파크</h2>
+            <p class="card-subtitle">GJTP · Gwangju Techno Park</p>
+          </div>
+          <span class="card-tag">GJTP</span>
+        </div>
+
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://www.gjtp.or.kr/home/business.cs?m=8" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2260" target="_blank" rel="noopener">
+              <span class="dday safe">D-14</span>
+              <div class="announcement-content">
+                <div class="announcement-title">신규 규제혁신 기획지원과제 발굴을 위한 수요조사 공고</div>
+                <div class="announcement-meta">
+                  <span>No. 1773</span>
+                  <span>·</span>
+                  <span>2026-09-08 ~ 2026-09-30</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2257" target="_blank" rel="noopener">
+              <span class="dday safe">D-14</span>
+              <div class="announcement-content">
+                <div class="announcement-title">「2026년도 연구개발특구진흥재단 광주특구본부」 지역혁신 실증 프로젝트 기획 실증의제 수요조사 공고(2차)</div>
+                <div class="announcement-meta">
+                  <span>No. 1771</span>
+                  <span>·</span>
+                  <span>2026-09-01 ~ 2026-09-30</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <div class="quick-links">
+          <a class="quick-link" href="https://www.gjtp.or.kr/home/sub.cs?m=14" target="_blank" rel="noopener">일반공지</a>
+          <a class="quick-link" href="https://www.gjtp.or.kr/home/board/B0010.cs?m=11" target="_blank" rel="noopener">보도자료</a>
+          <a class="quick-link" href="https://www.gjtp.or.kr/home/board/B0167.cs?m=331" target="_blank" rel="noopener">입주기업 모집</a>
+          <a class="quick-link" href="https://www.gjtp.or.kr/home/board/B0012.cs?m=12" target="_blank" rel="noopener">자료실</a>
+        </div>
+      </section>
+
+      <!-- 대구테크노파크 (DGTP) -->
+      <!-- DGTP -->
+      <section class="card" data-agency="DGTP">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">대구테크노파크</h2>
+            <p class="card-subtitle">DGTP · Daegu Techno Park</p>
+          </div>
+          <span class="card-tag">DGTP</span>
+        </div>
+
+        <div class="section-label">
+          <h3>📢 최신 사업공고</h3>
+          <a class="view-all" href="https://dgtp.or.kr/bbs/BoardControll.do?bbsId=BBSMSTR_000000000003" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15761" target="_blank" rel="noopener">
+              <span class="dday safe">D-16</span>
+              <div class="announcement-content">
+                <div class="announcement-title">(연장공고) 초광역프로젝트(R&D) 기술수요조사 공고</div>
+                <div class="announcement-meta">
+                  <span>No. 2205</span>
+                  <span>·</span>
+                  <span>정책기획단</span>
+                  <span>·</span>
+                  <span>2026-09-14 ~ 10-02</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <div class="quick-links">
+          <a class="quick-link" href="https://dpis.or.kr/page/businessList.do" target="_blank" rel="noopener">기업지원시스템(DPIS)</a>
+          <a class="quick-link" href="https://dgtp.or.kr/bbs/BoardControll.do?bbsId=BBSMSTR_000000000004" target="_blank" rel="noopener">채용공고</a>
+          <a class="quick-link" href="http://www.star.daegu.kr" target="_blank" rel="noopener">대구스타기업</a>
+          <a class="quick-link" href="http://www.hittp.org" target="_blank" rel="noopener">대구하나로</a>
+        </div>
+      </section>
+
+      <!-- 혁신장터 (PPI) -->
+      <section class="card" data-agency="PPI">
+        <div class="card-header">
+          <div class="card-title-wrap">
+            <h2 class="card-title">혁신장터 (시범구매)</h2>
+            <p class="card-subtitle">PPI · 공공혁신조달플랫폼 · 조달청</p>
+          </div>
+          <span class="card-tag">PPI</span>
+        </div>
+
+        <div class="section-label">
+          <h3>📢 혁신제품 시범구매 공지</h3>
+          <a class="view-all" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsList_usr.do" target="_blank" rel="noopener">전체보기 →</a>
+        </div>
+
+        <ul class="announcement-list">
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031970" target="_blank" rel="noopener">
+              <span class="dday neutral">안내</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 3차(구매) 혁신제품 시범사용 구매계약 일정 및 제출서류안내 (관련서식 포함)</div>
+                <div class="announcement-meta">
+                  <span>공지</span>
+                  <span>·</span>
+                  <span>등록 2026-08-19</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031943" target="_blank" rel="noopener">
+              <span class="dday neutral">결과</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 제3차 혁신제품 시범구매 선정결과 알림</div>
+                <div class="announcement-meta">
+                  <span>No. 155</span>
+                  <span>·</span>
+                  <span>등록 2026-08-18</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031817" target="_blank" rel="noopener">
+              <span class="dday neutral">안내</span>
+              <div class="announcement-content">
+                <div class="announcement-title">2026년 3차 혁신제품 시범구매 선정결과 발표 지연 안내 ('26.8.18. 발표예정)</div>
+                <div class="announcement-meta">
+                  <span>No. 154</span>
+                  <span>·</span>
+                  <span>등록 2026-08-05</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031518" target="_blank" rel="noopener">
+              <span class="dday neutral">결과</span>
+              <div class="announcement-content">
+                <div class="announcement-title">(26년 3차) 혁신제품 시범사용 결과 공개 - 해외실증</div>
+                <div class="announcement-meta">
+                  <span>No. 153</span>
+                  <span>·</span>
+                  <span>등록 2026-07-27</span>
+                </div>
+              </div>
+            </a>
+          </li>
+          <li class="announcement-item">
+            <a class="announcement-link" href="https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031517" target="_blank" rel="noopener">
+              <span class="dday neutral">결과</span>
+              <div class="announcement-content">
+                <div class="announcement-title">(26년 3차) 혁신제품 시범사용 결과 공개 - 국내실증2</div>
+                <div class="announcement-meta">
+                  <span>No. 152</span>
+                  <span>·</span>
+                  <span>등록 2026-07-27</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        </ul>
+
+        <div class="quick-links">
+          <a class="quick-link" href="https://ppi.g2b.go.kr:8914/portal/intro.do" target="_blank" rel="noopener">PPI 메인</a>
+          <a class="quick-link" href="https://ppi.g2b.go.kr:8914/sm/dm/smDmMain.do" target="_blank" rel="noopener">혁신제품 전용몰</a>
+          <a class="quick-link" href="https://ppi.g2b.go.kr:8914/sm/dm/mp/test/testApplNtceList.do" target="_blank" rel="noopener">시범사용 신청</a>
+          <a class="quick-link" href="https://techmarket.kr" target="_blank" rel="noopener">techmarket.kr ↗</a>
+        </div>
+      </section>
+
+      <div class="no-results" id="noResults">
+        <div class="no-results-icon">🔍</div>
+        <div>검색 결과가 없습니다.</div>
+      </div>
+
+    </main>
+
+    <footer>
+      <div class="footer-notice">
+        ⚠️ 본 페이지의 공고 데이터는 <strong id="footerDate">2026-09-16</strong> 기준입니다. 실제 신청 전에는 반드시 각 기관 홈페이지에서 최신 정보를 확인하세요.
+      </div>
+      <div>외부 링크는 새 창에서 열립니다 · Ctrl/Cmd + 클릭으로 백그라운드 탭 열기</div>
+    </footer>
+
+  </div>
+
+  <!-- ═══ AI 요약 모달 ═══ -->
+  <div class="summary-modal" id="summaryModal" onclick="if(event.target===this)closeSummary()">
+    <div class="summary-modal-content">
+      <button class="summary-close-btn" onclick="closeSummary()" aria-label="닫기">×</button>
+      <div class="summary-modal-header">
+        <div class="icon">📄</div>
+        <div class="title-wrap">
+          <div class="summary-modal-title" id="summaryModalTitle"></div>
+          <div class="summary-modal-meta" id="summaryModalMeta"></div>
+        </div>
+      </div>
+      <div id="summaryModalBody"></div>
+    </div>
+  </div>
+
+<script>
+  // ── 다크모드 토글 ──
+  // 초기 테마 결정: 저장값 > 시스템 설정 > 라이트
+  (function initTheme() {
+    try {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    } catch (e) {}
+  })();
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('theme', next); } catch (e) {}
+  }
+
+  // 오늘 날짜 표시
+  const today = new Date();
+  document.getElementById('today').textContent = today.toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric', weekday: 'long'
+  });
+
+  // ═══ 뉴로핏 지원 우선순위 자동 판정 ═══
+  // 뉴로핏(뇌 영상 AI, 알츠하이머·치매 진단) 관점의 사업 우선순위
+  const PRIORITY_KEYWORDS = {
+    // R급 (💰 매출): 매출 인식 가능한 사업 — 뉴로핏이 공급자로서 매출 발생
+    // 원칙: 뉴로핏이 '판매자(seller)'로 참여하는 경우만. 비용/자금 지원은 제외.
+    R: [
+      // AI/데이터 바우처 (공급기업 등록 시 수요기업이 바우처로 결제 → 매출)
+      'AI 바우처', 'AI바우처', '데이터바우처', '데이터 바우처',
+      'AI 청년창업기업 동반성장 바우처',
+      '공급기업', '공급기업 후보군', 'POOL',
+      // 조달청 혁신제품 시범구매·시범사용 (조달청 예산으로 직접 구매)
+      '혁신제품 시범구매', '혁신제품 시범사용', '시범구매', '시범사용',
+      '혁신시제품 지정', '혁신제품 지정', '혁신시제품',
+      '수출선도형 혁신제품', '수출선도형 시범',
+      // 임차·임대 (뉴로핏 제품/장비 임대료 매출)
+      '임차사업', '임차 사업', '임대사업', '임대 사업', '리스사업',
+      // 판매장·전용몰 (판매 채널 = 매출)
+      '판매장', '전용몰', '해외 판매장', '판매지원사업',
+      // 해외실증 (조달청 예산으로 제품 구매 후 해외 실증)
+      '해외실증', '해외 실증', '국내실증',
+      // 조달·구매계약 (직접 판매)
+      '구매계약', '구매계약 일정',
+      // 판로 개척 (실제 판매 수반)
+      '판로개척', '판로 개척',
+      '조달청 예산'
+    ],
+    // S급: 뉴로핏 핵심 사업 완벽 매치 (반드시 검토)
+    // ⚠️ 전시회 참가·박람회 등은 여기 매치되도 별도 로직으로 B급 강제
+    S: [
+      'SaMD', '의료 AI', '의료AI', 'AI 의료', 'AI의료',
+      '뇌', '뇌영상', '뇌 영상', '치매', '알츠하이머', '신경', '뉴로',
+      '디지털치료제', '디지털 치료제',
+      '의료·헬스케어 상용화', '헬스케어 상용화',
+      'MRI', 'CT', '뇌 진단', '영상 진단', 'PoC 지원',
+      'ICT기반 의료', 'ICT 기반 의료',
+      '식약처 인증', 'FDA 인증', 'CE 인증', '의료기기 인증', '의료기기 인허가',
+      'GHKOL', '보건의료기술 R&D', '의료기기 상용화'
+    ],
+    // A급: 뉴로핏 사업과 매우 관련 (강력 추천)
+    A: [
+      '바이오헬스', '바이오 헬스', '보건의료', '보건 의료',
+      '의료시스템', '의료 시스템', '병원', '의료기관',
+      '헬스케어', '디지털치료', '디지털 치료',
+      '임상', '임상시험', '연구개발', 'R&D 의료',
+      '제약·바이오', '의료·바이오', 'K-바이오'
+    ],
+    // B급: AI 산업 일반, 성장/규제/해외진출 지원 (검토 가치)
+    // ⚠️ 수출바우처·시장개척단·K-VIP 등은 매출이 아닌 '지원사업'이므로 여기에 분류
+    B: [
+      'AI', '인공지능', 'AX', 'DX', '데이터',
+      // 규제 대응
+      '규제개혁', '규제 개혁', '규제혁신', '규제 혁신',
+      '규제대응', '규제 대응', '규제개선', 'GMP',
+      // 해외진출 '지원' (비용/자금 지원 = 매출 아님)
+      '글로벌', '해외진출', '해외 진출', '수출', '해외',
+      '수출바우처', '수출 바우처',
+      '시장개척단', '시장 개척단',
+      '해외규격인증', '해외 규격인증', '규격인증',
+      'K-VIP', 'K-바이오헬스', 'K-뷰티',
+      'BIO-EUROPE', 'BTS', 'CES', 'HLTH',  // 해외 전시회 참가지원
+      '전시회 참가', '박람회 참가', '한국관', '공동관',
+      '멘토십', '컨설팅 지원',
+      // 창업·성장 지원
+      '창업', '스케일업', '스타트업', '성장',
+      '투자', 'IR', '벤처'
+    ],
+    // C급: 참고할 수준 (인재·컨퍼런스·홍보 등)
+    C: [
+      '아카데미', '인재', '인력', '컨설팅', '교육', '연수',
+      '수요조사', '기획', '수요매칭',
+      '컨퍼런스', '전시회', '박람회', '포럼', '세미나',
+      '홍보', '멘토', '멘토십', '네트워킹',
+      '평가위원', '전문가'
+    ]
+  };
+
+  // 하위 호환용 (기존 코드가 참조)
+  const NEURO_KEYWORDS = PRIORITY_KEYWORDS.R.concat(PRIORITY_KEYWORDS.S, PRIORITY_KEYWORDS.A);
+  function isNeurophetRelated(title) {
+    if (!title) return false;
+    const p = evaluatePriority(title);
+    return p === 'R' || p === 'S' || p === 'A';
+  }
+
+  // 제목 기반 우선순위 판정 (R > S > A > B > C > null)
+  // ⚠️ 특수 규칙: 전시회·박람회·참가기업 모집 등은 매출·핵심이 아닌 지원사업 → B급 강제
+  function evaluatePriority(title) {
+    if (!title) return null;
+    const t = title.toLowerCase();
+
+    // 1) R급 (매출 인식) 먼저 체크 - 최상위 우선
+    const isRevenue = PRIORITY_KEYWORDS.R.some(kw => t.includes(kw.toLowerCase()));
+    if (isRevenue) return 'R';
+
+    // 2) 전시회 참가 지원 사업 감지 → B급 강제 (매출 아니고 참가비 지원)
+    const exhibitionPatterns = [
+      '전시회', '박람회', '컨퍼런스 참가', '컨퍼런스참가',
+      '참가기업 모집', '참가기관 모집', '참가 기업 모집',
+      '한국관', '공동관', '한국관 참가',
+      '시장개척단', '시장 개척단', '무역사절단', '무역 사절단',
+      '해외 세미나', '해외세미나',
+      // 국제 컨퍼런스·전시회 이름 (참가 지원 성격)
+      'hlth', 'bio-europe', 'bts', 'ces', 'rsna', 'whx', 'asco',
+      'medica', 'jpm', 'himss', 'fime'
+    ];
+    if (exhibitionPatterns.some(kw => t.includes(kw))) {
+      return 'B';  // 전시회 참가지원 = B급 (매출·핵심 아님)
+    }
+
+    // 3) 일반 판정 (S → A → B → C)
+    for (const level of ['S', 'A', 'B', 'C']) {
+      const kwList = PRIORITY_KEYWORDS[level];
+      if (kwList.some(kw => t.includes(kw.toLowerCase()))) {
+        return level;
+      }
+    }
+    return null;
+  }
+
+  // 우선순위 태그를 공고에 추가/갱신
+  function applyPriorityTags() {
+    document.querySelectorAll('.announcement-item').forEach(li => {
+      const dday = li.querySelector('.dday');
+      if (!dday || dday.textContent.trim() === '확인') return;
+
+      const titleEl = li.querySelector('.announcement-title');
+      if (!titleEl) return;
+
+      const level = evaluatePriority(titleEl.textContent);
+      li.dataset.priority = level || '';
+
+      // meta 영역에 태그 표시
+      const meta = li.querySelector('.announcement-meta');
+      if (!meta) return;
+
+      let tag = meta.querySelector('.priority-tag');
+      if (!level) {
+        if (tag) tag.remove();
+        return;
+      }
+      if (!tag) {
+        tag = document.createElement('span');
+        tag.className = 'priority-tag';
+        meta.insertBefore(tag, meta.firstChild);
+      }
+      tag.dataset.level = level;
+      // R급은 '💰 매출'로, 나머지는 'S급/A급/B급/C급'으로 표시
+      tag.textContent = level === 'R' ? '💰 매출' : (level + '급');
+      tag.title = ({
+        R: '💰 매출 인식 사업 — 뉴로핏 최상위 우선순위 (바우처·시범구매·임차·수출선도형 등)',
+        S: '🔥 반드시 검토 — 뉴로핏 핵심 사업(의료기기·뇌영상·디지털헬스 등)과 완벽 매치',
+        A: '⭐ 강력 추천 — 바이오헬스·병원·헬스케어와 매우 관련',
+        B: '⚡ 검토 가치 — AI·규제대응·해외진출 등 관련성 있음',
+        C: '💡 참고 — 컨퍼런스·인재양성·홍보 등 낮은 관련성'
+      })[level];
+    });
+  }
+
+  // 카테고리 카운트 + 각 항목에 data-category 저장 (하이라이트는 클릭 시에만)
+  function refreshDashboardStats() {
+    const items = document.querySelectorAll('.announcement-item');
+    let today = 0, urgent = 0, neuro = 0, total = 0;
+
+    items.forEach(li => {
+      const dday = li.querySelector('.dday');
+      const title = li.querySelector('.announcement-title')?.textContent || '';
+      if (!dday) return;
+
+      const ddayText = dday.textContent.trim();
+      if (ddayText === '확인') return;  // placeholder 제외
+
+      total++;
+
+      const cats = [];
+
+      // 오늘 마감
+      if (ddayText === '오늘') { today++; cats.push('today'); }
+
+      // D-3 이하 임박 (오늘 포함)
+      if (ddayText === '오늘') {
+        urgent++;
+        cats.push('urgent');
+      } else {
+        const m = ddayText.match(/^D-(\d+)$/);
+        if (m && parseInt(m[1], 10) <= 3) {
+          urgent++;
+          cats.push('urgent');
+        }
+      }
+
+      // 💰 매출 인식 (R급) — 매출이 실제로 발생하는 사업만 카운트
+      const priority = evaluatePriority(title);
+      if (priority === 'R') {
+        neuro++;
+        cats.push('neuro');
+      }
+
+      // 카테고리를 data attribute로 저장 (하이라이트는 클릭 시에만)
+      li.dataset.categories = cats.join(' ');
+    });
+
+    // 요약 바 값 업데이트
+    const setStat = (id, val) => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.textContent = val;
+        const parent = el.closest('.summary-item');
+        if (parent) parent.classList.toggle('zero', val === 0);
+      }
+    };
+    setStat('statToday', today);
+    setStat('statUrgent', urgent);
+    setStat('statNeuro', neuro);
+    setStat('statTotal', total);
+
+    // 현재 활성 카테고리 있으면 재적용 (자동 갱신 후 하이라이트 유지)
+    if (activeCategory) applyHighlight(activeCategory);
+  }
+
+  // ═══ 요약 박스 클릭 → 해당 공고 하이라이트 ═══
+  let activeCategory = null;  // 'today' | 'urgent' | 'neuro' | null
+
+  function applyHighlight(category) {
+    // 모든 항목에서 기존 하이라이트 제거
+    document.querySelectorAll('.announcement-item').forEach(li => {
+      li.classList.remove('hl-today', 'hl-urgent', 'hl-neuro');
+      if (!category) return;
+      const cats = (li.dataset.categories || '').split(' ');
+      if (cats.includes(category)) {
+        li.classList.add('hl-' + category);
+      }
+    });
+
+    // 요약 바 active 상태 업데이트
+    document.querySelectorAll('.summary-item').forEach(box => {
+      box.classList.toggle('active', box.dataset.kind === category);
+    });
+
+    // 배경 흐림 처리용 (dashboard-container에 has-active 추가)
+    const grid = document.querySelector('.grid');
+    if (grid) grid.classList.toggle('dashboard-container', true);
+    if (grid) grid.classList.toggle('has-active', !!category);
+  }
+
+  function toggleCategory(category) {
+    if (activeCategory === category) {
+      activeCategory = null;  // 같은 걸 다시 누르면 해제
+    } else {
+      activeCategory = category;
+    }
+    applyHighlight(activeCategory);
+  }
+
+  // 요약 박스 클릭 이벤트 바인딩
+  document.querySelectorAll('.summary-item').forEach(box => {
+    const kind = box.dataset.kind;
+    // '전체 활성'은 클릭해도 하이라이트할 게 없음 → 클릭하면 모두 해제
+    if (kind === 'total') {
+      box.addEventListener('click', () => {
+        activeCategory = null;
+        applyHighlight(null);
+      });
+    } else if (kind === 'today' || kind === 'urgent' || kind === 'neuro') {
+      box.addEventListener('click', () => toggleCategory(kind));
+    }
+  });
+
+  // ═══ 공고별 진행 상태 관리 ═══
+  const STATUS_CYCLE = [
+    { key: 'none',     label: '+ 상태',   tip: '상태 없음 (클릭하여 관심 표시)' },
+    { key: 'interest', label: '⭐관심',   tip: '관심' },
+    { key: 'review',   label: '🔍검토',   tip: '검토중' },
+    { key: 'planning', label: '📅예정',   tip: '신청예정' },
+    { key: 'done',     label: '✅완료',   tip: '신청완료' },
+    { key: 'skip',     label: '× 제외',   tip: '미해당' }
+  ];
+  const STATUS_STORAGE_KEY = 'gov-dashboard-status';
+
+  // localStorage에서 상태 불러오기
+  function loadStatuses() {
+    try {
+      const raw = localStorage.getItem(STATUS_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+  function saveStatuses(map) {
+    try { localStorage.setItem(STATUS_STORAGE_KEY, JSON.stringify(map)); } catch (e) {}
+  }
+  const statusMap = loadStatuses();
+
+  // 공고 고유키 = 상세 URL (href)
+  function getItemKey(li) {
+    const link = li.querySelector('.announcement-link');
+    return link ? link.getAttribute('href') : null;
+  }
+
+  // 다음 상태로 순환
+  function cycleStatus(currentKey) {
+    const idx = STATUS_CYCLE.findIndex(s => s.key === currentKey);
+    return STATUS_CYCLE[(idx + 1) % STATUS_CYCLE.length].key;
+  }
+
+  // 배지 시각 갱신
+  function updateBadge(badge, statusKey) {
+    const cfg = STATUS_CYCLE.find(s => s.key === statusKey) || STATUS_CYCLE[0];
+    badge.dataset.status = cfg.key;
+    badge.textContent = cfg.label;
+    badge.title = cfg.tip + ' (클릭하여 상태 변경)';
+    // 공고 카드에도 상태 클래스 부여 (완료 시 취소선 등)
+    const li = badge.closest('.announcement-item');
+    if (li) {
+      li.classList.remove('status-interest', 'status-review', 'status-planning', 'status-done', 'status-skip');
+      if (cfg.key !== 'none') li.classList.add('status-' + cfg.key);
+    }
+  }
+
+  // 각 공고에 상태 배지 추가
+  function initStatusBadges() {
+    document.querySelectorAll('.announcement-item').forEach(li => {
+      // 이미 배지 있으면 스킵
+      if (li.querySelector('.status-badge')) return;
+
+      const key = getItemKey(li);
+      if (!key) return;
+
+      // placeholder (확인) 카드는 배지 생략
+      const dday = li.querySelector('.dday');
+      if (!dday || dday.textContent.trim() === '확인') return;
+
+      const link = li.querySelector('.announcement-link');
+      if (!link) return;
+
+      // 배지 생성
+      const badge = document.createElement('button');
+      badge.type = 'button';
+      badge.className = 'status-badge';
+      badge.setAttribute('aria-label', '진행 상태');
+
+      // 배지가 링크 클릭을 방해하지 않도록 이벤트 분리
+      badge.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const cur = statusMap[key] || 'none';
+        const next = cycleStatus(cur);
+        if (next === 'none') delete statusMap[key];
+        else statusMap[key] = next;
+        saveStatuses(statusMap);
+        updateBadge(badge, next);
+        updateCardStatusCounts();
+      });
+
+      // 배지를 공고 카드 오른쪽 끝에 삽입 (link 밖에 두어 클릭 충돌 방지)
+      li.appendChild(badge);
+      li.classList.add('has-badge');
+
+      updateBadge(badge, statusMap[key] || 'none');
+    });
+  }
+
+  // 카드별 '신청완료' 개수 배지 갱신
+  function updateCardStatusCounts() {
+    document.querySelectorAll('.card[data-agency]').forEach(card => {
+      const done = card.querySelectorAll('.announcement-item.status-done').length;
+      let countEl = card.querySelector('.status-count');
+      if (!countEl) {
+        // 카드 헤더 옆에 카운트 배지 추가
+        const label = card.querySelector('.section-label h3');
+        if (label) {
+          countEl = document.createElement('span');
+          countEl.className = 'status-count';
+          countEl.title = '이 기관에서 신청완료 처리한 공고 수';
+          label.appendChild(countEl);
+        }
+      }
+      if (countEl) {
+        countEl.innerHTML = '✅ ' + done + '건 완료';
+        countEl.classList.toggle('has-value', done > 0);
+      }
+    });
+  }
+
+  // ═══ AI 공고 요약 (뉴로핏 관점) ═══
+  // 각 공고 URL을 키로, 뉴로핏 관점 사전 생성 요약을 저장
+  const ANNOUNCEMENT_SUMMARIES = {
+    // NIPA
+    'https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16934': {
+      overview: '2026년 3차 ICT 비즈니스 파트너십(중동) 모집. 중동 시장 진출 관심 국내 ICT 기업 대상 매칭·현지 파트너 연결 지원.',
+      key: ['해외진출 지원 사업 (참가지원, 매출 아님)', '중동 (UAE·사우디 등) 시장 파트너 매칭', 'ICT 기업 대상 → 뉴로핏 의료 AI 포함 가능성 높음'],
+      neuro: '**해외진출 지원 사업(B급)** — 매출 아닌 참가·매칭 지원. 뉴로핏의 중동 시장 진출 관심 있으면 좋은 기회. 사우디·UAE 등 병원·의료기기 시장이 성장 중이라 뇌영상 AI SaMD의 바이어 매칭 유리. 마케팅·해외팀과 참가 여부 논의 필요.',
+      action: 'review',
+      actionText: '⭐ 중동 진출 관심 시 검토'
+    },
+    'https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16931': {
+      overview: '인도 벵갈루루에서 열리는 아시아 최대 IT 컨퍼런스 BTS(Bengaluru Tech Summit) 2026 한국관 참가 기업 모집.',
+      key: ['해외 전시회 참가 지원', '인도 IT 시장 진출 기회', '부스 참가비·왕복 항공권·현지 프로그램 지원 가능성'],
+      neuro: '해외진출 지원 사업(B급). 매출이 아닌 참가비·경비 지원. 인도 의료 AI 시장 개척 관심 있으면 검토. 뉴로핏 뇌영상 AI는 인도 병원 시장에 잠재력 있음.',
+      action: 'review',
+      actionText: '관심 있으면 검토'
+    },
+    'https://www.nipa.kr/home/bsnsAll/0/nttDetail?tab=2&bbsNo=4&nttNo=16921': {
+      overview: '아시아·태평양 AI 특화지구(AHAP) 조성 사업 공고. AI 산업 클러스터 조성 관련.',
+      key: ['AI 특화 지역·인프라 조성', '클러스터 입주·참여 형태 확인 필요'],
+      neuro: 'AI 산업 인프라 사업(B급). 뉴로핏이 참여 가능한 트랙(수요기업/공급기업/입주기업)이 있는지 상세 확인 필요. 매출 사업 아님.',
+      action: 'review',
+      actionText: '상세 확인 필요'
+    },
+    // KHIDI
+    'https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=979&linkId=48949928&menuId=MENU01108': {
+      overview: '한국-카자흐스탄 보건의료 해외진출·공공조달 협력 세미나 참가기관 모집.',
+      key: ['카자흐스탄 시장 진출 지원', '공공조달 협력 세미나', '해외 진출 정보·네트워킹 기회'],
+      neuro: '해외진출 지원 사업(B급). 카자흐스탄 등 CIS 지역 의료 시장은 성장 중. 뉴로핏 알츠하이머 진단 솔루션 진출 검토 가치 있음. 매출 아니고 참가 지원.',
+      action: 'review',
+      actionText: '해외 진출 관심 시 검토'
+    },
+    'https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=978&linkId=48949906&menuId=MENU01108': {
+      overview: '2026년 글로벌 규제 대응 비용 지원(의료기기) 사업 수행기업 모집 3차 공고. FDA/CE 등 해외 인허가 비용 지원.',
+      key: ['의료기기 해외 인허가 규제 대응', 'FDA·CE·PMDA 등 인증 비용 지원', '수출 준비 의료기기 기업 대상'],
+      neuro: '**뉴로핏 핵심 사업 매치**. 뇌영상 AI 진단 SW(SaMD)의 FDA/CE 인증 진행 중이면 필수 검토. 규제 대응 비용 지원은 큰 도움. B급이지만 뉴로핏 관점에서는 반드시 검토.',
+      action: 'strong',
+      actionText: '⭐ 필수 검토'
+    },
+    'https://www.khidi.or.kr/board/view?pageNum=1&rowCnt=10&no1=975&linkId=48949614&menuId=MENU01108': {
+      overview: 'HLTH USA 2026 컨퍼런스 디지털헬스케어 한국관 참가기관 모집. 미국 최대 디지털헬스 이벤트.',
+      key: ['HLTH USA는 세계 최대 디지털헬스 컨퍼런스', '한국관 부스 참가비·항공권 등 지원', '미국 시장 진출·투자자·파트너 네트워킹 기회'],
+      neuro: '**참가지원 사업(B급)** — 매출 아닌 참가비 지원. 다만 뉴로핏의 미국 시장 진출 관심 있으면 좋은 기회. 뇌영상 AI 진단 솔루션 홍보·투자자 네트워킹에 유리. 참가 결정은 마케팅 예산·시기 고려.',
+      action: 'recommend',
+      actionText: '⭐ 미국 진출 관심 시 검토'
+    },
+    // GJTP
+    'https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2260': {
+      overview: '신규 규제혁신 기획지원과제 발굴 수요조사. 규제개선 아이디어 수렴.',
+      key: ['수요조사 (실제 사업 아님)', '규제 불합리 사례 제안 기회'],
+      neuro: '수요조사 참여로 향후 의료기기 규제 개선 반영 가능. 뉴로핏이 겪는 SaMD 관련 규제 이슈 제안 검토.',
+      action: 'review',
+      actionText: '규제 이슈 있으면 제안'
+    },
+    'https://www.gjtp.or.kr/home/business.cs?act=view&bsnssId=2257': {
+      overview: '연구개발특구진흥재단 광주특구본부 지역혁신 실증 프로젝트 수요조사 2차. 실증 아이디어 수렴 단계.',
+      key: ['수요조사 (아이디어 접수)', '수요기관(광주 병원 등) 필요 시 공급기업으로 뉴로핏 참여 가능', '주관: 광주특구본부'],
+      neuro: '**수요조사 단계**로 지역 무관하게 아이디어 제안 가능. 광주 병원 등과 협력해 뇌영상 AI 실증 아이디어 제안 검토. 수요기관이 광주면 공급기업(뉴로핏)은 서울이어도 무관한 사업이 많음.',
+      action: 'review',
+      actionText: '실증 아이디어 있으면 제안'
+    },
+    // DGTP
+    'https://dgtp.or.kr/bbs/BoardControllView.do?bbsId=BBSMSTR_000000000003&nttId=15761': {
+      overview: '(연장공고) 초광역프로젝트(R&D) 기술수요조사 공고. 대구·경북 초광역 협력 R&D 아이디어 수렴.',
+      key: ['수요조사 (실제 과제 공모 전 단계)', '초광역권 R&D 협력 관심 필요'],
+      neuro: '수요조사 단계로 매출 아님. 뉴로핏이 대구·경북 병원과 협력 R&D 관심 있으면 제안.',
+      action: 'review',
+      actionText: '대구권 협력 관심 시'
+    },
+    // PPI
+    'https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031970': {
+      overview: '2026년 3차(구매) 혁신제품 시범사용 구매계약 일정 및 제출서류 안내. 이미 선정된 기업 대상 계약 안내.',
+      key: ['💰 매출 인식 사업 핵심 안내', '조달청 시범구매 → 뉴로핏 매출 발생', '제출서류·일정 확인 필수'],
+      neuro: '**뉴로핏이 3차 시범구매에 선정되었다면 필수 확인**. 조달청 예산으로 뉴로핏 제품 구매 → 실제 매출 발생. 계약·서류 일정 놓치면 매출 지연.',
+      action: 'strong',
+      actionText: '⭐ 선정 시 매출 확정 절차'
+    },
+    'https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031943': {
+      overview: '2026년 제3차 혁신제품 시범구매 선정결과 알림. 뉴로핏 선정 여부 확인 필요.',
+      key: ['💰 뉴로핏 매출 사업 결과', '선정 명단 확인'],
+      neuro: '**뉴로핏이 신청했다면 즉시 확인 필수**. 선정 시 위 구매계약 진행. 미선정 시 다음 회차(4차) 재도전.',
+      action: 'strong',
+      actionText: '⭐ 결과 즉시 확인'
+    },
+    'https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031817': {
+      overview: '2026년 3차 혁신제품 시범구매 선정결과 발표 지연 안내(8.18 발표 예정).',
+      key: ['발표 지연 안내 공지', '실제 결과는 위 공지에서 확인'],
+      neuro: '지연 안내 → 이미 결과 나왔을 것. 위 결과 공지 확인.',
+      action: 'skip',
+      actionText: '참고 (지연 안내)'
+    },
+    'https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031518': {
+      overview: '(26년 3차) 혁신제품 시범사용 결과 공개 - 해외실증. 해외실증 트랙 결과.',
+      key: ['해외실증 결과 공개', '뉴로핏 참여 여부에 따라 확인'],
+      neuro: '해외실증에 뉴로핏 제품이 있었다면 결과 확인. 향후 시범사용 트랙 참고자료.',
+      action: 'review',
+      actionText: '참여 이력 있으면 확인'
+    },
+    'https://ppi.g2b.go.kr:8914/cm/bbs/usr/00021/bbsDetail_usr.do?bbsNo=00021&bbsCttNo=0000031517': {
+      overview: '(26년 3차) 혁신제품 시범사용 결과 공개 - 국내실증2. 국내 병원 실증 결과.',
+      key: ['국내 병원 시범사용 결과', '실증 성과 참고'],
+      neuro: '뉴로핏 뇌영상 AI가 국내 병원 실증 참여했다면 결과 확인. 향후 제안 참고자료.',
+      action: 'review',
+      actionText: '참여 이력 있으면 확인'
+    }
+  };
+
+  const ACTION_META = {
+    strong: { icon: '🔥', text: '강력 추천' },
+    recommend: { icon: '⭐', text: '검토 추천' },
+    review: { icon: '💡', text: '검토 가치' },
+    skip: { icon: '—', text: '해당 낮음' }
+  };
+
+  function openSummary(li) {
+    const link = li.querySelector('.announcement-link');
+    const url = link?.getAttribute('href');
+    const title = li.querySelector('.announcement-title')?.textContent || '';
+    const meta = li.querySelector('.announcement-meta')?.textContent.replace(/\s+/g, ' ').trim() || '';
+
+    const data = ANNOUNCEMENT_SUMMARIES[url];
+
+    document.getElementById('summaryModalTitle').textContent = title;
+    document.getElementById('summaryModalMeta').textContent = meta;
+
+    const body = document.getElementById('summaryModalBody');
+    if (!data) {
+      body.innerHTML = `
+        <div class="summary-section">
+          <p style="color: var(--text-secondary);">아직 이 공고에 대한 AI 요약이 생성되지 않았습니다.<br>
+          다음 자동 업데이트 시 요약이 추가됩니다.</p>
+        </div>
+        <a href="${url}" target="_blank" rel="noopener" class="summary-link-btn">🔗 공고 원문 보기</a>
+      `;
+    } else {
+      const actionMeta = ACTION_META[data.action] || ACTION_META.review;
+      body.innerHTML = `
+        <div class="summary-section">
+          <h4>📌 한 줄 개요</h4>
+          <p>${data.overview}</p>
+        </div>
+        <div class="summary-section">
+          <h4>🔑 핵심 정보</h4>
+          <ul>
+            ${data.key.map(k => `<li>${k}</li>`).join('')}
+          </ul>
+        </div>
+        <div class="summary-neuro-view">
+          <h4>🧠 뉴로핏 관점</h4>
+          <p>${data.neuro}</p>
+          <span class="summary-action-tag" data-action="${data.action}">${actionMeta.icon} ${data.actionText}</span>
+        </div>
+        <a href="${url}" target="_blank" rel="noopener" class="summary-link-btn">🔗 공고 원문 보기</a>
+      `;
+    }
+
+    document.getElementById('summaryModal').classList.add('show');
+  }
+
+  function closeSummary() {
+    document.getElementById('summaryModal').classList.remove('show');
+  }
+
+  // ESC로 닫기
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeSummary();
+  });
+
+  // 각 공고에 요약 버튼 추가
+  function initSummaryButtons() {
+    document.querySelectorAll('.announcement-item').forEach(li => {
+      if (li.querySelector('.summary-btn')) return;
+
+      const dday = li.querySelector('.dday');
+      if (!dday || dday.textContent.trim() === '확인') return;
+
+      const link = li.querySelector('.announcement-link');
+      if (!link) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'summary-btn';
+      btn.textContent = '📄';
+      btn.setAttribute('aria-label', 'AI 요약 보기');
+      btn.title = 'AI 요약 (뉴로핏 관점)';
+
+      // 사전 요약 있는지 표시
+      const url = link.getAttribute('href');
+      if (ANNOUNCEMENT_SUMMARIES[url]) {
+        btn.classList.add('has-summary');
+        btn.title = '✨ AI 요약 있음 - 뉴로핏 관점 분석 포함';
+      }
+
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSummary(li);
+      });
+
+      // 상태 배지 앞에 삽입 (right side)
+      const statusBadge = li.querySelector('.status-badge');
+      if (statusBadge) {
+        li.insertBefore(btn, statusBadge);
+      } else {
+        li.appendChild(btn);
+        li.classList.add('has-badge');
+      }
+    });
+  }
+
+  // ═══ 뉴로핏 참여 가능 여부 자동 판정 ═══
+  // 뉴로핏 프로필 (기반: 서울 소재 의료 AI 기업)
+  const NEUROPHET_PROFILE = {
+    location: '서울',
+    industry: '의료 AI · 뇌영상',
+    stage: '성장기'
+  };
+
+  // 자동 필터 제거 — 공고는 수동으로 큐레이션 (뉴로핏 관점에서 해당 없는 공고는 애초에 리스트에 넣지 않음)
+  // 남은 자리 표시자 (호환용)
+  function runAllDashboardUpdates() {
+    applyPriorityTags();
+    refreshDashboardStats();
+    initStatusBadges();
+    initSummaryButtons();
+    updateCardStatusCounts();
+  }
+
+  // 초기 실행
+  runAllDashboardUpdates();
+
+  // DOM 변경 감지 (자체 업데이트로 인한 재귀 방지)
+  let dashUpdating = false;
+  const dashObserver = new MutationObserver(() => {
+    if (dashUpdating) return;
+    dashUpdating = true;
+    requestAnimationFrame(() => {
+      runAllDashboardUpdates();
+      // 다음 프레임에 플래그 해제 (이번 프레임의 모든 뮤테이션을 흡수)
+      requestAnimationFrame(() => { dashUpdating = false; });
+    });
+  });
+  document.querySelectorAll('.announcement-list').forEach(list => {
+    dashObserver.observe(list, { childList: true, subtree: true, characterData: true });
+  });
+
+  // 토스트
+  function showToast(message, detail, isError = false) {
+    const toast = document.getElementById('toast');
+    toast.className = 'toast' + (isError ? ' error' : '');
+    toast.innerHTML = `<div>${message}</div>` + (detail ? `<div class="toast-detail">${detail}</div>` : '');
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 4000);
+  }
+
+  // 클립보드 복사
+  async function copyRefreshPrompt() {
+    const prompt = '정부과제 공고 대시보드 Artifact(gov-project-dashboard)를 지금 업데이트해줘. NIPA, KHIDI, GJTP, DGTP, PPI 다섯 기관의 최신 사업공고를 뉴로핏 관점에서 큐레이션하고 마감된 공고는 제외해줘. 자동 필터 없이 판단해서 해당되는 공고만 넣고, mcp__cowork__update_artifact로 배포해줘.';
+    const btn = document.getElementById('refreshBtn');
+    btn.classList.add('spinning');
+    setTimeout(() => btn.classList.remove('spinning'), 600);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(prompt);
+        showToast('✅ 프롬프트가 복사되었습니다', 'Cowork 채팅창에 Ctrl+V로 붙여넣고 Enter를 누르세요.');
+        return;
+      }
+      const ta = document.createElement('textarea');
+      ta.value = prompt;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      if (ok) showToast('✅ 프롬프트가 복사되었습니다', 'Cowork 채팅창에 Ctrl+V로 붙여넣고 Enter를 누르세요.');
+      else throw new Error('fail');
+    } catch {
+      showToast('⚠️ 복사 실패 — 직접 복사해주세요', prompt, true);
+    }
+  }
+
+  // ── 기관 필터 ──
+  let activeFilter = 'all';
+
+  function handleFilter(btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    applyAll();
+  }
+
+  // ── 검색 ──
+  let searchQuery = '';
+
+  function handleSearch() {
+    searchQuery = document.getElementById('searchInput').value.trim().toLowerCase();
+    applyAll();
+  }
+
+  function highlight(text, query) {
+    if (!query) return text;
+    const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+  }
+
+  function applyAll() {
+    const cards = document.querySelectorAll('.card[data-agency]');
+    let anyVisible = false;
+
+    cards.forEach(card => {
+      const agencyMatch = activeFilter === 'all' || activeFilter === card.dataset.agency;
+
+      if (!agencyMatch) {
+        card.classList.add('card-hidden');
+        return;
+      }
+
+      card.classList.remove('card-hidden');
+
+      const items = card.querySelectorAll('.announcement-item');
+      let cardHasMatch = false;
+
+      items.forEach(item => {
+        const titleEl = item.querySelector('.announcement-title');
+        // 원본 텍스트 보존
+        if (!titleEl.dataset.original) {
+          titleEl.dataset.original = titleEl.textContent;
+        }
+        const original = titleEl.dataset.original;
+
+        if (!searchQuery) {
+          titleEl.innerHTML = original;
+          item.classList.remove('item-hidden');
+          cardHasMatch = true;
+        } else if (original.toLowerCase().includes(searchQuery)) {
+          titleEl.innerHTML = highlight(original, searchQuery);
+          item.classList.remove('item-hidden');
+          cardHasMatch = true;
+        } else {
+          titleEl.innerHTML = original;
+          item.classList.add('item-hidden');
+        }
+      });
+
+      if (searchQuery && !cardHasMatch) {
+        card.classList.add('card-hidden');
+      } else {
+        anyVisible = true;
+      }
+    });
+
+    document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+  }
+</script>
+
+</body>
+</html>
